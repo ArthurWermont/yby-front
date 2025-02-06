@@ -38,7 +38,7 @@ const TableComponent = ({ planningList }: { planningList: any }) => {
             label: cooperative.qua.cooperative_name,
           }
         : "",
-      quin: cooperative.qui
+      qui: cooperative.qui
         ? {
             value: cooperative.qui.id,
             label: cooperative.qui.cooperative_name,
