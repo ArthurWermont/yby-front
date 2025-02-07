@@ -421,6 +421,7 @@ export default function CollectionForm({
               )
             }
             accept="image/*"
+            capture="environment"
             style={{ display: "none" }}
           />
 
