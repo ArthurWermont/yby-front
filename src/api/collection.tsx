@@ -40,7 +40,9 @@ const createCollection = async (data: any) => {
 
 const getCollection = async () => {
   try {
-    const response = await api.get("/collections?populate=*");
+    const response = await api.get(
+      "/collections?populate=*&pagination[start]=0&pagination[limit]=100000"
+    );
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);
@@ -55,7 +57,7 @@ const getCollectionClient = async ({
 }) => {
   try {
     const response = await api.get(
-      `/collections?filters[client][documentId][$eq]=${documentId}&populate=*`
+      `/collections?filters[client][documentId][$eq]=${documentId}&populate=*&pagination[start]=0&pagination[limit]=100000`
     );
     alert("Editado com sucesso!");
     return response.data;

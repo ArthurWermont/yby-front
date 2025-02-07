@@ -2,7 +2,9 @@ import api from "./api";
 
 const getPlanningList = async () => {
   try {
-    const response = await api.get("/plannings?populate=*");
+    const response = await api.get(
+      "/plannings?populate=*&pagination[start]=0&pagination[limit]=100000"
+    );
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar os cooperativas:", error);
