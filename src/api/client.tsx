@@ -63,7 +63,7 @@ const createClient = async ({
 
 const getClients = async () => {
   try {
-    const response = await api.get("/clients?populate=adress_data");
+    const response = await api.get("/clients?populate=adress_data&pagination[start]=0&pagination[limit]=100000");
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar os clientes:", error);
