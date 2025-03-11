@@ -40,10 +40,18 @@ const createCollection = async (data: any) => {
 
 const getCollection = async () => {
   try {
-    const response = await api.get(
-      "/collections?populate=*&pagination[start]=0&pagination[limit]=100000"
-    );
-    return response.data;
+    const responses = await Promise.all([
+      api.get(
+        "/collections?populate=*&pagination[page]=1&pagination[pageSize]=100"
+      ),
+      api.get(
+        "/collections?populate=*&pagination[page]=2&pagination[pageSize]=100"
+      ),
+    ]);
+    const data = responses.map((response) => response.data);
+    const joinData = data[0].data.concat(data[1].data);
+
+    return joinData;
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);
     return null;

@@ -53,14 +53,15 @@ export default function Reports() {
         const response = await getCollectionClient({
           documentId: currentUser?.client_id,
         });
-        const formattedData = formatCollection(response.data);
+        const formattedData = formatCollection(response);
         setCollections(formattedData);
       };
       getCollectionsData();
     } else {
       const getCollectionsData = async () => {
         const response = await getCollection();
-        const formattedData = formatCollection(response.data);
+        console.log("response", response);
+        const formattedData = formatCollection(response);
         setCollections(formattedData);
       };
 

@@ -98,8 +98,6 @@ const TableComponent = ({ collections, refreshPage }: any) => {
       headerName: "Ações",
       width: 100,
       sortable: false,
-      // align: "right",
-      // headerAlign: "right",
       renderCell: (params) => {
         const onClick = (e: { stopPropagation: () => void }) => {
           e.stopPropagation();
