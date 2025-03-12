@@ -236,7 +236,7 @@ const TableComponent = ({ collections, refreshPage }: any) => {
         />
       )}
 
-      <div style={{ height: 550, width: "100%", marginTop: "32px" }}>
+      <div style={{ width: "100%", marginTop: "32px" }}>
         <DataGrid
           rows={rows}
           columns={isAdmin ? columnsAdmin : columnsClient}
