@@ -98,8 +98,6 @@ const TableComponent = ({ collections, refreshPage }: any) => {
       headerName: "Ações",
       width: 100,
       sortable: false,
-      // align: "right",
-      // headerAlign: "right",
       renderCell: (params) => {
         const onClick = (e: { stopPropagation: () => void }) => {
           e.stopPropagation();
@@ -238,7 +236,7 @@ const TableComponent = ({ collections, refreshPage }: any) => {
         />
       )}
 
-      <div style={{ height: 550, width: "100%", marginTop: "32px" }}>
+      <div style={{ width: "100%", marginTop: "32px" }}>
         <DataGrid
           rows={rows}
           columns={isAdmin ? columnsAdmin : columnsClient}
