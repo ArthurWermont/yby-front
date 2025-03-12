@@ -45,6 +45,11 @@ const MainRoutes = () => {
                   path="/cadastro/cooperativa"
                   element={<Register type="cooperativa" />}
                 />
+                <Route
+                  path="/cadastro/users"
+                  element={<Register type="users" />}
+                />
+
                 <Route path="/planejamento" element={<PlanningList />} />
                 <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />

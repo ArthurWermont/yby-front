@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { styled as styledComponents } from "styled-components";
 import ClientForm from "./client-form";
 import CooperativeForm from "./cooperative-form";
+import BasicTable from "./users-form";
 
 const StyledContainer = styledComponents.div`
     display: flex;
@@ -30,6 +31,9 @@ export default function Register({ type }: { type: string }) {
       navigate("/cadastro/cooperativa");
     }
     setValue(newValue);
+    if(newValue===2){
+      navigate("/cadastro/users");
+    }
   };
 
   useEffect(() => {
@@ -39,6 +43,10 @@ export default function Register({ type }: { type: string }) {
     if (type === "cooperativa") {
       setValue(1);
     }
+    if(type ==="users"){
+      setValue(2);
+    }
+
   }, [type]);
 
   return (
@@ -101,9 +109,31 @@ export default function Register({ type }: { type: string }) {
           >
             COOPERATIVA
           </ToggleButton>
+          <ToggleButton
+            style={{
+              backgroundColor:
+                value === 2 ? "#15853B" : "rgb(200, 200, 200, 0.5)",
+              flex: 1,
+              height: "36px",
+              border: "0px",
+              borderTopRightRadius: "8px",
+              borderBottomRightRadius: "8px",
+              fontSize: "14px",
+              textAlign: "center",
+              cursor: "pointer",
+              fontWeight: "600",
+              color: value === 2 ? "white" : "#15853B",
+            }}
+            value="users"
+            selected={value === 2}
+            onChange={() => handleChange(2)}
+          >
+            USUÁRIOS
+          </ToggleButton>
         </div>
         {value === 0 && <ClientForm />}
         {value === 1 && <CooperativeForm />}
+        {value === 2 &&<BasicTable/>}
       </StyledCenterContainer>
     </StyledContainer>
   );

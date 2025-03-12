@@ -106,6 +106,13 @@ export default function ResponsiveDrawerLayout(props: Props) {
                 onClick={() => navigate("/cadastro/cooperativa")}
               />
             </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }}>
+              <ListItemText
+                primary="Usuários"
+                onClick={() => navigate("/cadastro/users")}
+              />
+            </ListItemButton>
+
           </List>
         </Collapse>
 
