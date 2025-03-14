@@ -44,7 +44,13 @@ export default function Reports() {
       };
     });
 
-    return formattedData;
+    const OrderByDate = formattedData.sort((a: any, b: any) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    return OrderByDate;
   };
 
   useEffect(() => {
@@ -60,6 +66,7 @@ export default function Reports() {
     } else {
       const getCollectionsData = async () => {
         const response = await getCollection();
+
         console.log("response", response);
         const formattedData = formatCollection(response);
         setCollections(formattedData);
