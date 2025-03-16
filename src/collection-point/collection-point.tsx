@@ -1,4 +1,4 @@
-import { ToggleButton } from "@mui/material";
+import { Button, ToggleButton, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { styled as styledComponents } from "styled-components";
 import { getClients } from "../api/client";
@@ -31,7 +31,10 @@ const StyledTabContainer = styledComponents.div`
 
 export default function CollectionPoint() {
   const { user: currentUser } = useContext(AuthContext);
-
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [selectedTab, setSelectedTab] = useState("pevs");
   const [selectedPEVS, setSelectedPEVS] = useState();
 
@@ -117,8 +120,23 @@ export default function CollectionPoint() {
     handleGetPevs();
   }, [currentUser?.cooperative_id]);
 
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setUserLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    });
+  };
+
   return (
     <StyledContainer>
+      <Button onClick={handleGetLocation}>Get Location</Button>
+      {userLocation && (
+        <Typography>
+          Latitude: {userLocation.latitude}, Longitude: {userLocation.longitude}
+        </Typography>
+      )}
       <StyledTabContainer>
         <ToggleButton
           style={{
