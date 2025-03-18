@@ -177,6 +177,12 @@ export default function CollectionForm({
           : null,
       };
 
+      const idsSalvos = localStorage.getItem("ids")
+        ? JSON.parse(localStorage.getItem("ids") || "[]")
+        : [];
+      idsSalvos.push(collectionPoint);
+      localStorage.setItem("ids", JSON.stringify(idsSalvos));
+
       const response = await createCollection(formatData);
 
       if (!responseUploadImage) {
