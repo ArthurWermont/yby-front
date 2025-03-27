@@ -1,18 +1,30 @@
 import { Box, Button, Typography } from "@mui/material";
 import Modal from "@mui/material/Modal";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { deleteClient } from "../../api/client";
 
-const ModalDeleteComponentt = ({ open, handleClose,clienteSelecionado }: any) => {
-  const [guardarNames,setGuardarNames] = useState<any[]>([]);
-  const [guardarCnpj,setGuardarCnpj] = useState<any[]>([]);
-   // Atualizar o nome do cliente selecionado ao abrir o modal
-   useEffect(() => {
+const ModalDeleteComponentt = ({
+  open,
+  handleClose,
+  clienteSelecionado,
+}: any) => {
+  const [guardarNames, setGuardarNames] = useState<any[]>([]);
+  const [guardarCnpj, setGuardarCnpj] = useState<any[]>([]);
+
+  useEffect(() => {
     if (clienteSelecionado) {
       setGuardarNames(clienteSelecionado.name);
-      setGuardarCnpj(clienteSelecionado.cnpj)
+      setGuardarCnpj(clienteSelecionado.cnpj);
     }
-  }, [clienteSelecionado]); // Só atualiza quando `clienteSelecionado` mudar
-  
+  }, []);
+
+  const handleDelete = async () => {
+    await deleteClient(clienteSelecionado.client_id);
+    // criar toast
+
+    handleClose();
+  };
+
   return (
     <Modal
       open={open}
@@ -30,8 +42,7 @@ const ModalDeleteComponentt = ({ open, handleClose,clienteSelecionado }: any) =>
           bgcolor: "background.paper",
           boxShadow: 24,
           padding: "20px",
-          zIndex: 1300
-
+          zIndex: 1300,
         }}
       >
         <div
@@ -44,7 +55,8 @@ const ModalDeleteComponentt = ({ open, handleClose,clienteSelecionado }: any) =>
           <Typography
             style={{ fontWeight: "bold", fontSize: "18px", color: "#4B3838" }}
           >
-            Tem certeza que deseja excluir o Usuário {guardarNames} de CNPJ {guardarCnpj}?
+            Tem certeza que deseja excluir o Usuário {guardarNames} de CNPJ{" "}
+            {guardarCnpj}?
           </Typography>
 
           <Typography style={{ fontSize: "14px" }}>
@@ -60,7 +72,7 @@ const ModalDeleteComponentt = ({ open, handleClose,clienteSelecionado }: any) =>
               width: "120px",
               height: "42px",
             }}
-            onClick={handleClose}
+            onClick={() => handleClose()}
           >
             Cancelar
           </Button>
@@ -74,6 +86,7 @@ const ModalDeleteComponentt = ({ open, handleClose,clienteSelecionado }: any) =>
               width: "80px",
               height: "42px",
             }}
+            onClick={handleDelete}
           >
             Sim
           </Button>

@@ -63,7 +63,9 @@ const createClient = async ({
 
 const getClients = async () => {
   try {
-    const response = await api.get("/clients?populate=adress_data&pagination[start]=0&pagination[limit]=100000");
+    const response = await api.get(
+      "/clients?populate=adress_data&pagination[start]=0&pagination[limit]=100000"
+    );
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar os clientes:", error);
@@ -81,4 +83,14 @@ const getSingleClients = async ({ clientId }: { clientId: string }) => {
   }
 };
 
-export { createClient, getClients, getSingleClients };
+const deleteClient = async (clientId: any) => {
+  try {
+    const response = await api.delete(`/clients/${clientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao deletar:", error);
+    return null;
+  }
+};
+
+export { createClient, deleteClient, getClients, getSingleClients };
