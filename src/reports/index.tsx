@@ -3,7 +3,9 @@ import { useContext, useEffect, useState } from "react";
 import { styled as styledComponents } from "styled-components";
 import { getCollection, getCollectionClient } from "../api/collection";
 import { AuthContext } from "../context/auth-context";
-import TableComponent from "./components/table";
+import TableComponent from "./components/basic-table";
+import GenerateExcel from "./components/excel";
+import GeneratePDF from "./components/pdf";
 
 const StyledContainer = styledComponents.div`
     display: flex;
@@ -86,6 +88,10 @@ export default function Reports() {
           Relatórios
         </Typography>
 
+        <GeneratePDF collections={collections} />
+        <GenerateExcel />
+
+        {/*<TableComponent collections={collections} />*/}
         <TableComponent collections={collections} />
       </StyledCenterContainer>
     </StyledContainer>

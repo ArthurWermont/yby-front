@@ -47,9 +47,17 @@ const getCollection = async () => {
       api.get(
         "/collections?populate=*&pagination[page]=2&pagination[pageSize]=100"
       ),
+      api.get(
+        "/collections?populate=*&pagination[page]=3&pagination[pageSize]=100"
+      ),
+      api.get(
+        "/collections?populate=*&pagination[page]=4&pagination[pageSize]=100"
+      ),
     ]);
     const data = responses.map((response) => response.data);
-    const joinData = data[0].data.concat(data[1].data);
+    const joinData = data.flatMap((item) => item.data);
+
+    console.log(joinData, data);
 
     return joinData;
   } catch (error) {
