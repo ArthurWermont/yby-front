@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import api from "./api";
 
 type Address = {
@@ -86,11 +87,15 @@ const getSingleClients = async ({ clientId }: { clientId: string }) => {
 const deleteClient = async (clientId: any) => {
   try {
     const response = await api.delete(`/clients/${clientId}`);
+    console.log("Resposta da API:", response); // Verifique a resposta da API
+    toast.success('Cliente excluído com sucesso!');
     return response.data;
-  } catch (error) {
-    console.error("Erro ao deletar:", error);
+  } catch (error: any) {
+    console.error("Erro ao deletar:", error.response ? error.response.data : error.message);
+    toast.error('Erro ao excluir o cliente!');
     return null;
   }
 };
+
 
 export { createClient, deleteClient, getClients, getSingleClients };

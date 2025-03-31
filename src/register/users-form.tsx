@@ -1,6 +1,5 @@
 import DeleteIcon from "@mui/icons-material/Delete";
-import { IconButton } from "@mui/material";
-import Paper from "@mui/material/Paper";
+import { Card, IconButton } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -13,7 +12,7 @@ import { AuthContext } from "../context/auth-context";
 import ModalDeleteComponentt from "./components/modal-delete";
 
 export default function BasicTable() {
-  const [guardarClientes, setGuardarClientes] = useState<any[]>([]);
+  const [saveClients, setSaveClients] = useState<any[]>([]);
   const { user: currentUser } = useContext(AuthContext);
   const [openModalD, setOpenModalD] = useState(false);
   const [formData, setFormData] = useState<any>();
@@ -30,9 +29,10 @@ export default function BasicTable() {
       name: collection?.social_name || "", // Substituindo para o nome real do cliente
       cnpj: collection?.cnpj || "",
       phone: collection?.phone || "",
+      id: collection?.id || "",
     }));
   };
-
+  
   useEffect(() => {
     if (isClient) {
       const getCollectionsData = async () => {
@@ -40,14 +40,14 @@ export default function BasicTable() {
           clientId: currentUser?.documentId,
         });
         const formattedData = formatCollection(response.data);
-        setGuardarClientes(formattedData);
+        setSaveClients(formattedData);
       };
       getCollectionsData();
     } else {
       const getCollectionsData = async () => {
         const response = await getClients();
         const formattedData = formatCollection(response.data);
-        setGuardarClientes(formattedData);
+        setSaveClients(formattedData);
       };
 
       getCollectionsData();
@@ -56,18 +56,18 @@ export default function BasicTable() {
 
   return (
     <div>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="clientes table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Nome</TableCell>
-              <TableCell align="right">CNPJ</TableCell>
-              <TableCell align="right">Telefone</TableCell>
-              <TableCell align="right">Ação</TableCell>
+      <TableContainer component={Card}>
+        <Table sx={{ minWidth: 650 }} aria-label="clientes table" >
+          <TableHead >
+            <TableRow style={{backgroundColor:'#F9F5ED'}}>
+              <TableCell style={{color:'black'}}>Nome</TableCell>
+              <TableCell style={{color:'black'}} align="right">CNPJ</TableCell>
+              <TableCell style={{color:'black'}} align="right">Telefone</TableCell>
+              <TableCell style={{color:'black'}} align="right">Ação</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {guardarClientes.map((cliente) => (
+            {saveClients.map((cliente) => (
               <TableRow
                 key={cliente.name}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -95,7 +95,7 @@ export default function BasicTable() {
         <ModalDeleteComponentt
           open={openModalD}
           handleClose={() => setOpenModalD(false)}
-          clienteSelecionado={formData}
+          selectedClient={formData}
         />
       )}
     </div>
