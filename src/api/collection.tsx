@@ -40,20 +40,27 @@ const createCollection = async (data: any) => {
 
 const getCollection = async () => {
   try {
-    const responses = await Promise.all([
-      api.get(
-        "/collections?populate=*&pagination[page]=1&pagination[pageSize]=100"
-      ),
-      api.get(
-        "/collections?populate=*&pagination[page]=2&pagination[pageSize]=100"
-      ),
-      api.get(
-        "/collections?populate=*&pagination[page]=3&pagination[pageSize]=100"
-      ),
-      api.get(
-        "/collections?populate=*&pagination[page]=4&pagination[pageSize]=100"
-      ),
-    ]);
+    // Faz a primeira requisição para obter o número total de páginas
+    const firstResponse = await api.get(
+      "/collections?populate=*&pagination[page]=1&pagination[pageSize]=100"
+    );
+
+    const totalPages = firstResponse.data.meta.pagination.pageCount;
+
+    // Cria um array de promessas para buscar todas as páginas
+    const requests = [];
+    for (let page = 1; page <= totalPages; page++) {
+      requests.push(
+        api.get(
+          `/collections?populate=*&pagination[page]=${page}&pagination[pageSize]=100`
+        )
+      );
+    }
+
+    // Aguarda todas as requisições serem concluídas
+    const responses = await Promise.all(requests);
+
+    // Extrai e combina os dados de todas as páginas
     const data = responses.map((response) => response.data);
     const joinData = data.flatMap((item) => item.data);
 
