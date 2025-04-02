@@ -70,6 +70,15 @@ const TableComponent = ({ collections, refreshPage }: any) => {
       width: 150,
     },
     {
+      field: "avaria",
+      headerName: "Avaria",
+      sortable: false,
+      width: 160,
+      renderCell: (params) => {
+        return params.row.imageAvaria ? "Sim" : "Não";
+      },
+    },
+    {
       field: "fotos",
       headerName: "Registro em fotos",
       sortable: false,
