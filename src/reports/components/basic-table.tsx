@@ -115,10 +115,10 @@ const TableComponent = ({ collections, refreshPage }: any) => {
         />
       )}
 
-      <TableContainer style={{ marginTop: "32px" }}>
+      <TableContainer style={{ marginTop: "32px", border: "1px solid #ccc" }}>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow style={{ backgroundColor: "rgba(221, 195, 147, 0.2)" }}>
               {columns.map((column) => (
                 <TableCell key={column.key} style={{ width: column.width }}>
                   {column.label}

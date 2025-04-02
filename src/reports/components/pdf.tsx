@@ -7,8 +7,8 @@ import {
   View,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../context/auth-context";
+import { Button } from "@mui/material";
+import { styled } from "@mui/system";
 
 // Estilos do PDF
 const styles = StyleSheet.create({
@@ -66,6 +66,16 @@ const styles = StyleSheet.create({
   },
 });
 
+// Estilo do botão
+const StyledButton = styled(Button)({
+  backgroundColor: "#15853B",
+  color: "#fff",
+  textTransform: "none",
+  "&:hover": {
+    backgroundColor: "#15853B",
+  },
+});
+
 // Componente para gerar o PDF
 const MyDocument = ({ rows }: any) => (
   <Document>
@@ -106,44 +116,31 @@ const MyDocument = ({ rows }: any) => (
 
 // Componente que cria o link de download para o PDF
 const GeneratePDF = ({ collections }: any) => {
-  const { user: currentUser } = useContext(AuthContext);
-
-  const [rows, setRows] = useState<any>([]);
-
   // Formatação das coleções para os dados
-  useEffect(() => {
-    const formatCollection = (data: any) => {
-      const formattedData = data.map((collection: any) => ({
-        documentId: collection.documentId,
-        id: collection.id,
-        pev: collection.pev,
-        waste: collection.waste,
-        weight: collection.weight,
-        createdAt: format(collection.createdAt, "dd/MM/yyyy | HH:mm"),
-        hasAvaria: collection.imageAvaria ? "Sim" : "Não",
-        imageAvaria: collection.imageAvaria,
-        imageColectorUrl: collection.imageColectorUrl,
-        wastesIds: collection.wastesIds,
-      }));
-      setRows(formattedData);
-    };
-
-    formatCollection(collections);
-  }, [collections]);
+  const rows = collections.map((collection: any) => ({
+    documentId: collection.documentId,
+    id: collection.id,
+    pev: collection.pev,
+    waste: collection.waste,
+    weight: collection.weight,
+    createdAt: format(new Date(collection.createdAt), "dd/MM/yyyy | HH:mm"),
+    hasAvaria: collection.imageAvaria ? "Sim" : "Não",
+    imageAvaria: collection.imageAvaria,
+    imageColectorUrl: collection.imageColectorUrl,
+    wastesIds: collection.wastesIds,
+  }));
 
   return (
-    <div>
-      <PDFDownloadLink
-        document={<MyDocument rows={rows} />}
-        fileName="relatorio_de_coleta.pdf"
-      >
-        {({ loading }) => (
-          <span>
-            {loading ? "Carregando documento..." : "Baixar Relatório em PDF"}
-          </span>
-        )}
-      </PDFDownloadLink>
-    </div>
+    <PDFDownloadLink
+      document={<MyDocument rows={rows} />}
+      fileName="relatorio_de_coleta.pdf"
+    >
+      {({ loading }) => (
+        <StyledButton>
+          {loading ? "Carregando..." : "Exportar para PDF"}
+        </StyledButton>
+      )}
+    </PDFDownloadLink>
   );
 };
 
