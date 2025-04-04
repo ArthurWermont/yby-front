@@ -1,4 +1,3 @@
-import { toast } from "react-toastify";
 import api from "./api";
 
 type Address = {
@@ -65,7 +64,7 @@ const createClient = async ({
 const getClients = async () => {
   try {
     const response = await api.get(
-      "/clients?populate=adress_data&pagination[start]=0&pagination[limit]=100000"
+      "/clients?populate=*&pagination[start]=0&pagination[limit]=100000"
     );
     return response.data;
   } catch (error) {
@@ -88,14 +87,33 @@ const deleteClient = async (clientId: any) => {
   try {
     const response = await api.delete(`/clients/${clientId}`);
     console.log("Resposta da API:", response); // Verifique a resposta da API
-    toast.success('Cliente excluído com sucesso!');
     return response.data;
   } catch (error: any) {
     console.error("Erro ao deletar:", error.response ? error.response.data : error.message);
-    toast.error('Erro ao excluir o cliente!');
     return null;
   }
 };
 
+const deleteUser = async (userId: any) => {
+  try {
+    const response = await api.delete(`/api/users/${userId}`);
+    console.log("Resposta da API:", response); // Verifique a resposta da API
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro ao deletar:", error.response ? error.response.data : error.message);
+    return null;
+  }
+};
 
-export { createClient, deleteClient, getClients, getSingleClients };
+const deleteAdress = async (adressId: any) => {
+  try {
+    const response = await api.delete(`/api/adresses/${adressId}`);
+    console.log("Resposta da API:", response); // Verifique a resposta da API
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro ao deletar:", error.response ? error.response.data : error.message);
+    return null;
+  }
+};
+
+export { createClient, deleteClient, getClients, getSingleClients, deleteUser, deleteAdress };

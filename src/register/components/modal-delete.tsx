@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import Modal from "@mui/material/Modal";
-import { deleteClient } from "../../api/client";
-import { toast } from "react-toastify";
+import { deleteAdress, deleteClient, deleteUser } from "../../api/client";
+//import { toast } from "react-toastify";
 
 const ModalDeleteComponentt = ({
   open,
@@ -10,19 +10,18 @@ const ModalDeleteComponentt = ({
 }: any) => {
 
   const handleDelete = async () => {
-    console.log("Cliente selecionado para exclusão:", selectedClient);
-    if (!selectedClient?.id) {
-      toast.error('ID do cliente não encontrado!');
-      return;
-    }
-    const deletedClient = await deleteClient(selectedClient.id);
-    if (deletedClient) {
+    try {
+      await deleteClient(selectedClient.id);
+      await deleteUser(selectedClient.idUser);
+      await deleteAdress(selectedClient.idAdress);
+      alert("Cliente deletado com sucesso!")
       handleClose(); // Fecha o modal se a exclusão for bem-sucedida
+      window.location.reload()
+    } catch (error) {
+      alert('Erro ao excluir o cliente!');
     }
-  };
-  console.log(handleDelete())
-  console.log(" cliente:", selectedClient.id);
-
+  }
+ 
   return (
     <>
       <Modal

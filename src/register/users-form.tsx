@@ -25,11 +25,14 @@ export default function BasicTable() {
   const isClient = !!currentUser?.client_id;
 
   const formatCollection = (data: any) => {
+    console.log(data)
     return data.map((collection: any) => ({
       name: collection?.social_name || "", // Substituindo para o nome real do cliente
       cnpj: collection?.cnpj || "",
       phone: collection?.phone || "",
-      id: collection?.id || "",
+      id: collection?.documentId || "",
+      idUser: collection?.user?.documentId || "",
+      idAdress: collection?.adress_data?.[0]?.documentId || "",
     }));
   };
   
