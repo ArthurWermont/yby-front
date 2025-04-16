@@ -1,3 +1,5 @@
+import { Button } from "@mui/material";
+import { styled } from "@mui/system";
 import {
   Document,
   Page,
@@ -7,8 +9,6 @@ import {
   View,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
-import { Button } from "@mui/material";
-import { styled } from "@mui/system";
 
 // Estilos do PDF
 const styles = StyleSheet.create({
@@ -96,6 +96,7 @@ const MyDocument = ({ rows }: any) => (
           <Text style={styles.tableCell}>PEV</Text>
           <Text style={styles.tableCell}>Tipo de Resíduos</Text>
           <Text style={styles.tableCell}>Coleta (kg)</Text>
+          <Text style={styles.tableCell}>Cooperativa</Text>
           <Text style={styles.tableCell}>Avaria</Text>
         </View>
 
@@ -106,6 +107,7 @@ const MyDocument = ({ rows }: any) => (
             <Text style={styles.tableCell}>{row.pev}</Text>
             <Text style={styles.tableCell}>{row.waste}</Text>
             <Text style={styles.tableCell}>{row.weight}</Text>
+            <Text style={styles.tableCell}>{row.cooperative}</Text>
             <Text style={styles.tableCellNoBorder}>{row.hasAvaria}</Text>
           </View>
         ))}
@@ -128,6 +130,7 @@ const GeneratePDF = ({ collections }: any) => {
     imageAvaria: collection.imageAvaria,
     imageColectorUrl: collection.imageColectorUrl,
     wastesIds: collection.wastesIds,
+    cooperative: collection.cooperative.cooperative_name,
   }));
 
   return (

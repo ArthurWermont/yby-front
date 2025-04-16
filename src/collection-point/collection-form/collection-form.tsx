@@ -17,13 +17,15 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { createCollection, uploadImage } from "../../api/collection";
 import Leaf from "../../assets/leaf";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { getCooperatives } from "../../api/cooperative";
+import { AuthContext } from "../../context/auth-context";
 
 const StyledImage = styled("img")({
   objectFit: "fill",
@@ -90,6 +92,8 @@ export default function CollectionForm({
   const [selectedValue, setSelectedValue] = React.useState("no");
 
   const [loading, setLoading] = useState(false);
+
+  const { user: currentUser } = useContext(AuthContext);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -162,7 +166,17 @@ export default function CollectionForm({
         };
       });
 
+      const cooperatives = await getCooperatives();
+
+      const cooperative = cooperatives.data.find(
+        (cooperative: any) =>
+          cooperative.user.username === currentUser?.username
+      );
+
       const formatData = {
+        cooperative: {
+          id: cooperative?.id,
+        },
         wastes: wastes,
         weight,
         client_id: collectionPoint,

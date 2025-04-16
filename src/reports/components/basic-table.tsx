@@ -42,6 +42,7 @@ const TableComponent = ({ collections, refreshPage }: any) => {
         imageAvaria: collection.imageAvaria,
         imageColectorUrl: collection.imageColectorUrl,
         wastesIds: collection.wastesIds,
+        cooperative: collection.cooperative.cooperative_name,
       }));
       setRows(formattedData);
     };
@@ -76,6 +77,7 @@ const TableComponent = ({ collections, refreshPage }: any) => {
         { label: "Tipo de Resíduos", key: "waste", width: 200 },
         { label: "Coleta (kg)", key: "weight", width: 150 },
         { label: "Avaria", key: "hasAvaria", width: 150 },
+        { label: "Cooperativa", key: "cooperative", width: 200 },
         { label: "Ações", key: "actions", width: 150 },
       ]
     : [

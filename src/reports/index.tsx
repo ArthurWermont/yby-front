@@ -38,12 +38,9 @@ const StyledEmptyMessage = styled("div")({
 });
 
 const StyledButton = styled(Button)({
-  backgroundColor: "#4B3838",
+  backgroundColor: "#15853B",
   color: "#fff",
   textTransform: "none",
-  "&:hover": {
-    backgroundColor: "#6A4F4F",
-  },
 });
 
 export default function Reports() {
@@ -72,6 +69,7 @@ export default function Reports() {
         imageAvaria: collection?.breakdown?.url || "",
         imageColectorUrl: collection.colector?.url || "",
         wastesIds: wastesIds || [],
+        cooperative: collection?.cooperative || "",
       };
     });
 
@@ -99,7 +97,6 @@ export default function Reports() {
       const getCollectionsData = async () => {
         const response = await getCollection();
 
-        console.log("response", response);
         const formattedData = formatCollection(response);
         setCollections(formattedData);
         setFilteredCollections(formattedData);
@@ -141,6 +138,25 @@ export default function Reports() {
     setFilteredCollections(filtered);
   };
 
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  const handleFilterByDate = () => {
+    if (!startDate || !endDate) return;
+
+    const filtered = collections.filter((collection: any) => {
+      const collectionDate = new Date(collection.createdAt);
+      return (
+        collectionDate >= new Date(startDate) &&
+        collectionDate <= new Date(endDate)
+      );
+    });
+
+    setFilteredCollections(filtered);
+  };
+
+  console.log("filteredCollections", filteredCollections);
+
   return (
     <StyledContainer>
       <StyledCenterContainer>
@@ -154,13 +170,32 @@ export default function Reports() {
         <StyledActionsContainer>
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <TextField
-              label="Buscar por nome"
+              label="Buscar por PEV"
               variant="outlined"
               value={searchTerm}
               onChange={handleSearchByName}
               size="small"
               style={{ width: "300px" }}
             />
+            <TextField
+              label="Data Inicial"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+            />
+            <TextField
+              label="Data Final"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+            />
+            <StyledButton onClick={handleFilterByDate}>
+              Filtrar por Data
+            </StyledButton>
             <IconButton
               onClick={handleReorderByDateAscending}
               style={{ backgroundColor: "#15853B", color: "#fff" }}
