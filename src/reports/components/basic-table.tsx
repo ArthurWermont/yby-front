@@ -17,7 +17,7 @@ import ModalDeleteComponent from "./modal-delete";
 import ModalFormComponent from "./modal-form";
 import ModalComponent from "./modal-image";
 
-const TableComponent = ({ collections, refreshPage }: any) => {
+const TableComponent = ({ collections }: any) => {
   const { user: currentUser } = useContext(AuthContext);
   const isAdmin = !!currentUser?.isAdmin;
 
@@ -59,6 +59,8 @@ const TableComponent = ({ collections, refreshPage }: any) => {
   const handleDelete = (data: any) => {
     setOpenModalDelete(true);
     setFormData(data);
+    // recarregue a tela
+    window.location.reload();
   };
 
   const handleViewImage = (data: any) => {

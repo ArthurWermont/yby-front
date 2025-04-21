@@ -17,7 +17,7 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { createCollection, uploadImage } from "../../api/collection";
 import Leaf from "../../assets/leaf";
@@ -94,6 +94,26 @@ export default function CollectionForm({
   const [loading, setLoading] = useState(false);
 
   const { user: currentUser } = useContext(AuthContext);
+
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+        },
+        (err) => {
+          console.error("Erro ao obter localização:", err);
+        }
+      );
+    } else {
+    }
+  }, []);
 
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -189,6 +209,8 @@ export default function CollectionForm({
         breakdown: responseAvariaImage
           ? { id: responseAvariaImage[0].id }
           : null,
+        latitude: location?.latitude?.toString() || null,
+        longitude: location?.longitude?.toString() || null,
       };
 
       const idsSalvos = localStorage.getItem("ids")

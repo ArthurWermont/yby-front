@@ -132,9 +132,12 @@ export default function Reports() {
     const term = event.target.value.toLowerCase();
     setSearchTerm(term);
 
-    const filtered = collections.filter((collection: any) =>
-      collection.pev.toLowerCase().includes(term)
+    const filtered = collections.filter(
+      (collection: any) =>
+        collection.pev.toLowerCase().includes(term) ||
+        collection?.cooperative?.cooperative_name?.toLowerCase().includes(term)
     );
+
     setFilteredCollections(filtered);
   };
 
@@ -154,8 +157,6 @@ export default function Reports() {
 
     setFilteredCollections(filtered);
   };
-
-  console.log("filteredCollections", filteredCollections);
 
   return (
     <StyledContainer>

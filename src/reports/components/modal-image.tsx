@@ -81,7 +81,7 @@ const ModalComponent = ({ open, handleClose, images }: any) => {
                 <img
                   width="250"
                   height="250"
-                  src={`http://3.88.210.55:1337${images?.imageAvaria}`}
+                  src={`${images?.imageAvaria}`}
                   alt="Imagem"
                 />
               </div>

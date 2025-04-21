@@ -77,44 +77,76 @@ const StyledButton = styled(Button)({
 });
 
 // Componente para gerar o PDF
-const MyDocument = ({ rows }: any) => (
-  <Document>
-    <Page style={styles.page}>
-      <Text style={styles.title}>Relatório de Coleta de Resíduos</Text>
-      <View style={styles.section}>
-        <Text style={styles.text}>
-          Este é o relatório de coleta de resíduos, contendo detalhes sobre cada
-          coleta realizada.
-        </Text>
-      </View>
+const MyDocument = ({ rows }: any) => {
+  const totalWeight = rows.reduce(
+    (sum: number, row: any) => sum + parseFloat(row.weight || 0),
+    0
+  );
 
-      {/* Tabela */}
-      <View style={styles.table}>
-        {/* Cabeçalho da Tabela */}
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableCell}>Data | Horário</Text>
-          <Text style={styles.tableCell}>PEV</Text>
-          <Text style={styles.tableCell}>Tipo de Resíduos</Text>
-          <Text style={styles.tableCell}>Coleta (kg)</Text>
-          <Text style={styles.tableCell}>Cooperativa</Text>
-          <Text style={styles.tableCell}>Avaria</Text>
+  return (
+    <Document>
+      <Page style={styles.page}>
+        <Text style={styles.title}>Relatório de Coleta de Resíduos</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            Este é o relatório de coleta de resíduos, contendo detalhes sobre
+            cada coleta realizada.
+          </Text>
         </View>
 
-        {/* Corpo da Tabela */}
-        {rows.map((row: any) => (
-          <View key={row.id} style={styles.tableRow}>
-            <Text style={styles.tableCell}>{row.createdAt}</Text>
-            <Text style={styles.tableCell}>{row.pev}</Text>
-            <Text style={styles.tableCell}>{row.waste}</Text>
-            <Text style={styles.tableCell}>{row.weight}</Text>
-            <Text style={styles.tableCell}>{row.cooperative}</Text>
-            <Text style={styles.tableCellNoBorder}>{row.hasAvaria}</Text>
+        {/* Tabela */}
+        <View style={styles.table}>
+          {/* Cabeçalho da Tabela */}
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableCell}>Data | Horário</Text>
+            <Text style={styles.tableCell}>PEV</Text>
+            <Text style={styles.tableCell}>Tipo de Resíduos</Text>
+            <Text style={styles.tableCell}>Coleta (kg)</Text>
+            <Text style={styles.tableCell}>Cooperativa</Text>
+            <Text style={styles.tableCell}>Avaria</Text>
           </View>
-        ))}
-      </View>
-    </Page>
-  </Document>
-);
+
+          {/* Corpo da Tabela */}
+          {rows.map((row: any) => (
+            <View key={row.id} style={styles.tableRow}>
+              <Text style={styles.tableCell}>{row.createdAt}</Text>
+              <Text style={styles.tableCell}>{row.pev}</Text>
+              <Text style={styles.tableCell}>{row.waste}</Text>
+              <Text style={styles.tableCell}>{row.weight}</Text>
+              <Text style={styles.tableCell}>{row.cooperative}</Text>
+              <Text style={styles.tableCellNoBorder}>{row.hasAvaria}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            Peso Total das Coletas: {totalWeight} kg
+          </Text>
+          <Text style={styles.text}>Total de Coletas: {rows.length}</Text>
+          <Text style={styles.text}>
+            Total de Avarias:{" "}
+            {rows.filter((row: any) => row.hasAvaria === "Sim").length}
+          </Text>
+          <Text style={styles.text}>
+            Total de Resíduos:{" "}
+            {rows.reduce((acc: any, row: any) => acc + row.wastesIds.length, 0)}
+          </Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            Este relatório foi gerado automaticamente e contém informações
+            precisas sobre as coletas realizadas.
+          </Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            Data de Geração: {format(new Date(), "dd/MM/yyyy | HH:mm")}
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};
 
 // Componente que cria o link de download para o PDF
 const GeneratePDF = ({ collections }: any) => {
