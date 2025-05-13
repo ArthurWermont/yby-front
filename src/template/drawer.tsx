@@ -16,6 +16,7 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 import * as React from "react";
 import { useContext } from "react";
@@ -133,6 +134,15 @@ export default function ResponsiveDrawerLayout(props: Props) {
           <ListItemText
             style={{ color: "black", fontWeight: "bold" }}
             primary="Relatórios"
+          />
+        </ListItemButton>
+        <ListItemButton onClick={() => navigate("/dashboard")}>
+          <ListItemIcon>
+            <AnalyticsIcon />
+          </ListItemIcon>
+          <ListItemText
+            style={{ color: "black", fontWeight: "bold" }}
+            primary="Dashboard"
           />
         </ListItemButton>
       </>
