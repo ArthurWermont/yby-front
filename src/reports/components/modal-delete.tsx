@@ -7,6 +7,8 @@ const ModalDeleteComponent = ({ open, handleClose, documentId }: any) => {
     await deleteCollection(documentId);
     handleClose();
     alert("Deletado com sucesso!");
+    // recarregue a tela
+    window.location.reload();
   };
 
   return (

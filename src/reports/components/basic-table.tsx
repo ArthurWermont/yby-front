@@ -59,8 +59,6 @@ const TableComponent = ({ collections }: any) => {
   const handleDelete = (data: any) => {
     setOpenModalDelete(true);
     setFormData(data);
-    // recarregue a tela
-    window.location.reload();
   };
 
   const handleViewImage = (data: any) => {
