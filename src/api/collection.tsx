@@ -82,7 +82,6 @@ const getCollectionClient = async ({
     const response = await api.get(
       `/collections?filters[client][documentId][$eq]=${documentId}&populate=*&pagination[start]=0&pagination[limit]=100000`
     );
-    alert("Editado com sucesso!");
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);

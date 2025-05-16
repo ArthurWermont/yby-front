@@ -88,7 +88,7 @@ export default function Reports() {
         const response = await getCollectionClient({
           documentId: currentUser?.client_id,
         });
-        const formattedData = formatCollection(response);
+        const formattedData = formatCollection(response.data);
         setCollections(formattedData);
         setFilteredCollections(formattedData);
       };
