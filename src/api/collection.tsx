@@ -79,13 +79,22 @@ const getCollectionClient = async ({
   documentId: string | undefined;
 }) => {
   try {
+    const clienteResponse = await api.get(`/clients/${documentId}`);
+    const clients = clienteResponse.data.data.clients;
+    let query = "";
+    if (clients) {
+      query = clienteResponse.data.data.clients
+        .reduce((acc: string, cnpj: string, index: number) => {
+          return acc + `filters[$or][${index+1}][client][cnpj][$in]=${cnpj}&`;
+        }, "")
+        .slice(0, -1);
+    }
     const response = await api.get(
-      `/collections?filters[client][documentId][$eq]=${documentId}&populate=*&pagination[start]=0&pagination[limit]=100000`
+      `/collections?filters[$or][0][client][documentId][$eq]=${documentId}&populate=*&pagination[start]=0&pagination[limit]=100000&${query}`
     );
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);
-    alert("falha ao editar coleta!");
     return null;
   }
 };

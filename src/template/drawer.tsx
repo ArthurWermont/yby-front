@@ -26,6 +26,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import LogoutIcon from "@mui/icons-material/Logout";
+import EditIcon from "@mui/icons-material/Edit";
 import { AuthContext } from "../context/auth-context";
 
 const drawerWidth = 240;
@@ -40,6 +41,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [openEdit, setOpenEdit] = React.useState(false);
   const { user, logout } = useContext(AuthContext);
 
   const isClient = !!user?.client_id;
@@ -69,6 +71,10 @@ export default function ResponsiveDrawerLayout(props: Props) {
 
   const handleClick = () => {
     setOpen(!open);
+  };
+
+  const handleClickEditButton = () => {
+    setOpenEdit(!openEdit);
   };
 
   const handleLogout = () => {
@@ -128,6 +134,28 @@ export default function ResponsiveDrawerLayout(props: Props) {
             primary="Relatórios"
           />
         </ListItemButton>
+
+        <ListItemButton onClick={handleClickEditButton}>
+          <ListItemIcon>
+            <EditIcon />
+          </ListItemIcon>
+          <ListItemText
+            style={{ color: "black", fontWeight: "bold" }}
+            primary="Edição"
+          />
+          {openEdit ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+
+        <Collapse in={openEdit} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => navigate("/edit/client")}
+            >
+              <ListItemText primary="Clientes" />
+            </ListItemButton>
+          </List>
+        </Collapse>
       </>
     );
   };

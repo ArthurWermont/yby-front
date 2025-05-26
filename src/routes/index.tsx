@@ -9,6 +9,7 @@ import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
 import Reports from "../reports";
+import Edit from "../edit";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -44,6 +45,11 @@ const MainRoutes = () => {
                 <Route
                   path="/cadastro/cooperativa"
                   element={<Register type="cooperativa" />}
+                />
+                <Route path="/editar" element={<Navigate to="/edit/client" />} />
+                <Route
+                  path="/edit/client"
+                  element={<Edit type="cliente" />}
                 />
                 <Route path="/planejamento" element={<PlanningList />} />
                 <Route path="/relatorios" element={<Reports />} />
