@@ -1,6 +1,5 @@
 import {
   Autocomplete,
-  AutocompleteRenderInputParams,
   Button,
   CircularProgress,
   Divider,
@@ -10,7 +9,7 @@ import {
 } from "@mui/material";
 import { Box, styled } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
-import { createClient, getClients, updateClient } from "../api/client";
+import { getClients, updateClient } from "../api/client";
 import { AddressFormComponent } from "../register/components/address-form-component";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -157,7 +156,7 @@ export default function ClientForm({
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState([]);
 
-  const { control, handleSubmit, reset, setError, register } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       client_clients,
       client_cnpj,
