@@ -155,6 +155,18 @@ const getSingleClients = async ({ clientId }: { clientId: string }) => {
   }
 };
 
+const getClientByEmail = async (email: string) => {
+  try {
+    const response = await api.get(
+      `/clients?filters[email][$eq]=${email}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar o cliente pelo email:", error);
+    return null;
+  }
+}
+
 export {
   createClient,
   getClients,
@@ -162,4 +174,5 @@ export {
   getClientsByName,
   updateClient,
   getClientsByCNPJs,
+  getClientByEmail
 };

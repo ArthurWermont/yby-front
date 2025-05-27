@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Box, styled } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
-import { createClient } from "../api/client";
+import { createClient, getClientByEmail } from "../api/client";
 import { AddressFormComponent } from "./components/address-form-component";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -163,6 +163,16 @@ export default function ClientForm() {
 
     // todo: ajustar ordem de criacao no back , para nao ter 2 empresas publicadas com msm nome
     try {
+      const email_res = await getClientByEmail(data.client_email);
+      const email_data = email_res.data;
+      if (email_data.length > 0) {
+        setLoading(false);
+        setError("client_email", {
+          type: "manual",
+          message: "E-mail já cadastrado",
+        });
+        return;
+      }
       const createdClient = await createClient({
         cnpj: data.client_cnpj,
         social_name: data.client_socialName,
