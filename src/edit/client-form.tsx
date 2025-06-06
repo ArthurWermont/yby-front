@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   CircularProgress,
   Divider,
@@ -8,11 +9,11 @@ import {
 } from "@mui/material";
 import { Box, styled } from "@mui/system";
 import { Controller, useForm } from "react-hook-form";
-import { createClient, getClientByEmail } from "../api/client";
-import { AddressFormComponent } from "./components/address-form-component";
+import { getClients, updateClient } from "../api/client";
+import { AddressFormComponent } from "../register/components/address-form-component";
 
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as yup from "yup";
 
 import { IMaskInput } from "react-imask";
@@ -31,22 +32,6 @@ const FormField = styled(Box)<{ size?: string }>`
   min-width: 200px;
   flex-grow: 1;
 `;
-
-// interface ClientFormData {
-//   client_cnpj: string;
-//   client_socialName: string;
-//   client_responsibleName: string;
-//   client_email: string;
-//   client_phone: string;
-//   client_username: string;
-//   client_password: string;
-//   client_cep: string;
-//   client_street: string;
-//   client_street_number: string;
-//   client_neighborhood: string;
-//   client_city: string;
-//   client_state: string;
-// }
 
 interface CustomProps {
   onChange: (event: { target: { name: string; value: string } }) => void;
@@ -94,10 +79,11 @@ const CNPJMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
 );
 
 const schema = yup.object().shape({
+  client_clients: yup.array().of(yup.object()),
   client_cnpj: yup
     .string()
     .required("CNPJ é obrigatório")
-    .min(18, "CNPJ deve ter pelo menos 14 dígitos"),
+    .min(14, "CNPJ deve ter pelo menos 14 dígitos"),
   client_socialName: yup.string().required("Razão Social é obrigatória"),
   client_responsibleName: yup
     .string()
@@ -113,12 +99,7 @@ const schema = yup.object().shape({
   client_phone: yup
     .string()
     // .required("Telefone é obrigatório")
-    .min(14, "Telefone deve ter pelo menos 10 dígitos"),
-  client_username: yup.string().required("Usuário é obrigatório"),
-  client_password: yup
-    .string()
-    .required("Senha de acesso é obrigatória")
-    .min(6, "Senha deve ter pelo menos 6 dígitos"),
+    .min(10, "Telefone deve ter pelo menos 10 dígitos"),
   client_cep: yup
     .string()
     .required("CEP é obrigatório")
@@ -133,26 +114,78 @@ const schema = yup.object().shape({
   client_city: yup.string().required("Cidade é obrigatória"),
 });
 
-export default function ClientForm() {
+export type ClientFormProps = {
+  document_id: string;
+  client_address_document_id: string;
+  client_cnpj: string;
+  client_socialName: string;
+  client_responsibleName: string;
+  client_email: string;
+  client_phone: string;
+  client_cep: string;
+  client_street: string;
+  client_street_number: number;
+  client_neighborhood: string;
+  client_state: string;
+  client_city: string;
+  client_clients: { value: string; label: string}[];
+};
+
+type Props = {
+  client: ClientFormProps;
+};
+
+export default function ClientForm({
+  client: {
+    document_id,
+    client_address_document_id,
+    client_cnpj,
+    client_socialName,
+    client_responsibleName,
+    client_email,
+    client_phone,
+    client_cep,
+    client_street,
+    client_street_number,
+    client_neighborhood,
+    client_state,
+    client_city,
+    client_clients,
+  },
+}: Props) {
   const [loading, setLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      client_cnpj: "",
-      client_socialName: "",
-      client_responsibleName: "",
-      client_email: "",
-      client_phone: "",
-      client_username: "",
-      client_password: "",
-      client_cep: "",
-      client_street: "",
-      client_street_number: 0,
-      client_neighborhood: "",
-      client_state: "",
+      client_clients,
+      client_cnpj,
+      client_socialName,
+      client_responsibleName,
+      client_email,
+      client_phone,
+      client_cep,
+      client_street,
+      client_street_number,
+      client_neighborhood,
+      client_state,
+      client_city,
     },
     resolver: yupResolver(schema),
   });
+
+  useEffect(() => {
+    getClients().then((res) => {
+      console.log("res", res);
+      const data = res.data.map((client: any) => {
+        return {
+          value: client.cnpj,
+          label: client.social_name,
+        };
+      });
+      setOptions(data);
+    });
+  }, []);
 
   const onSubmit = async (data: any) => {
     setLoading(true);
@@ -163,25 +196,19 @@ export default function ClientForm() {
 
     // todo: ajustar ordem de criacao no back , para nao ter 2 empresas publicadas com msm nome
     try {
-      const email_res = await getClientByEmail(data.client_email);
-      const email_data = email_res.data;
-      if (email_data.length > 0) {
-        setLoading(false);
-        setError("client_email", {
-          type: "manual",
-          message: "E-mail já cadastrado",
-        });
-        return;
-      }
-      const createdClient = await createClient({
+      const updatedClient = await updateClient({
+        document_id,
         cnpj: data.client_cnpj,
         social_name: data.client_socialName,
         responsible_name: data.client_responsibleName,
         email: data.client_email,
         phone: data.client_phone,
         password: data.client_password,
-
+        clients: data.client_clients.map(
+          (c: { value: string; label: string }) => c.value
+        ),
         adress_data: {
+          documentId: client_address_document_id,
           cep: data.client_cep,
           street: data.client_street,
           number: data.client_street_number,
@@ -190,9 +217,9 @@ export default function ClientForm() {
           state: data.client_state,
         },
       });
-      if (createdClient) {
-        // alert("Cliente criado com sucesso!");
-        window.location.reload();
+      if (updatedClient) {
+        alert("Cliente atualizado com sucesso!");
+        // window.location.reload();
 
         setLoading(false);
       }
@@ -207,7 +234,7 @@ export default function ClientForm() {
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form key="submitedit" onSubmit={handleSubmit(onSubmit)}>
         <Typography
           fontSize={20}
           marginTop={"16px"}
@@ -379,55 +406,31 @@ export default function ClientForm() {
             />
           </FormField>
 
-          <FormField key={"client_username"}>
+          <FormField>
             <Controller
-              name={"client_username"}
+              name={"client_clients"}
               control={control}
               rules={{ required: true }}
               render={({ field, fieldState }) => (
                 <>
-                  <TextField
-                    {...field}
-                    id={"client_username"}
-                    type="outlined"
-                    placeholder={"Nome de usuário"}
-                    required={true}
-                    fullWidth
-                    label={"Usuário"}
-                    variant="outlined"
+                  <Autocomplete
+                    multiple
+                    limitTags={2}
+                    id="client_clients"
                     size="small"
-                    autoComplete="off"
-                    error={fieldState.error ? true : false}
-                  />
-                  {fieldState.error && (
-                    <FormHelperText style={{ color: "red" }}>
-                      {fieldState.error.message}
-                    </FormHelperText>
-                  )}
-                </>
-              )}
-            />
-          </FormField>
-
-          <FormField key={"client_password"}>
-            <Controller
-              name={"client_password"}
-              control={control}
-              rules={{ required: true }}
-              render={({ field, fieldState }) => (
-                <>
-                  <TextField
-                    {...field}
-                    id={"client_password"}
-                    type="password"
-                    placeholder={"Senha de acesso"}
-                    required={true}
-                    fullWidth
-                    label={"Senha"}
-                    variant="outlined"
-                    size="small"
-                    autoComplete="off"
-                    error={fieldState.error ? true : false}
+                    onChange={(_, data) => field.onChange(data)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        {...field}
+                        id="client_clients"
+                        label="Clientes"
+                        placeholder="Clientes"
+                        error={fieldState.error ? true : false}
+                      />
+                    )}
+                    options={options}
+                    defaultValue={field.value}
                   />
                   {fieldState.error && (
                     <FormHelperText style={{ color: "red" }}>
@@ -471,7 +474,7 @@ export default function ClientForm() {
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              "Cadastrar"
+              "Editar"
             )}
           </Button>
         </div>
