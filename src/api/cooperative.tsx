@@ -28,7 +28,9 @@ const createCooperative = async ({
 
 const getCooperatives = async () => {
   try {
-    const response = await api.get("/cooperatives?populate=*&pagination[start]=0&pagination[limit]=100000");
+    const response = await api.get(
+      "/cooperatives?populate=*&pagination[start]=0&pagination[limit]=100000"
+    );
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar as cooperativas:", error);
@@ -39,7 +41,7 @@ const getCooperatives = async () => {
 const getListOfPevsByCooperative = async () => {
   try {
     const response = await api.get(
-      "/plannings?populate=*&pagination[start]=0&pagination[limit]=100000"
+      "/plannings?populate=*&pagination[start]=0&pagination[limit]=100000&filters[client][$notNull]=true"
     );
     return response.data;
   } catch (error) {
