@@ -49,6 +49,10 @@ jobs:
             sudo usermod -aG docker $USER
             sudo systemctl start docker
             sudo systemctl enable docker
+
+            if [ -d "/home/ubuntu/yby-front-app" ]; then
+              sudo rm -rf /home/ubuntu/yby-front-app
+            fi
             unzip /home/ubuntu/yby-front-app.zip -d /home/ubuntu/yby-front-app
             cd /home/ubuntu/yby-front-app
 
@@ -58,10 +62,6 @@ jobs:
             sudo docker volume prune -f
             sudo docker network prune -f
             sudo docker system prune -a --volumes -f
-            
+
             sudo docker build -t yby-front-app .
             sudo docker run -d -p 80:80 yby-front-app
-
-
-
-

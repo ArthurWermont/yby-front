@@ -51,6 +51,14 @@ export const PEVSList = ({
     return dias[dayOfWeek];
   };
 
+  const isCollected = (id: string) => {
+    const idsSalvos = localStorage.getItem("ids")
+      ? JSON.parse(localStorage.getItem("ids") || "[]")
+      : [];
+
+    return idsSalvos.includes(String(id));
+  };
+
   return (
     <>
       <div
@@ -80,6 +88,8 @@ export const PEVSList = ({
         {filteredDataPevs.map(
           (
             pev: {
+              id: string;
+              documentId: string;
               adress_data: any;
               social_name: string;
               days: string[];
@@ -135,7 +145,7 @@ export const PEVSList = ({
               </div>
 
               <Button
-                disabled={!compareDays(pev?.days)}
+                disabled={!compareDays(pev?.days) || isCollected(pev?.id)}
                 variant="outlined"
                 style={{
                   padding: "8px 16px",
@@ -145,7 +155,11 @@ export const PEVSList = ({
                 }}
                 onClick={() => handleSelectedPevs(pev)}
               >
-                Coletar aqui
+                {isCollected(pev?.id) ? (
+                  <>Já foi coletado</>
+                ) : (
+                  <>Coletar aqui</>
+                )}
               </Button>
             </Card>
           )
