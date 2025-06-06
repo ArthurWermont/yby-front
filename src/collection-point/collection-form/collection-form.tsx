@@ -482,9 +482,9 @@ export default function CollectionForm({
                   style={{ marginTop: "16px" }}
                   {...field}
                   id="weight"
-                  placeholder="peso em kg"
+                  placeholder="medida em Kilos ou Litros"
                   required
-                  label="Peso (kg)"
+                  label="Medida (Kg/L)"
                   variant="outlined"
                   autoComplete="off"
                   error={fieldState.error ? true : false}

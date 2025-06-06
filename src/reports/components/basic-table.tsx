@@ -75,7 +75,7 @@ const TableComponent = ({ collections }: any) => {
         { label: "Data | Horário", key: "createdAt", width: 200 },
         { label: "PEV", key: "pev", width: 150 },
         { label: "Tipo de Resíduos", key: "waste", width: 200 },
-        { label: "Coleta (kg)", key: "weight", width: 150 },
+        { label: "Coleta (Kg/L)", key: "weight", width: 150 },
         { label: "Avaria", key: "hasAvaria", width: 150 },
         { label: "Cooperativa", key: "cooperative", width: 200 },
         { label: "Ações", key: "actions", width: 150 },
@@ -84,7 +84,7 @@ const TableComponent = ({ collections }: any) => {
         { label: "Data | Horário", key: "createdAt", width: 200 },
         { label: "PEV", key: "pev", width: 150 },
         { label: "Tipo de Resíduos", key: "waste", width: 200 },
-        { label: "Coleta (kg)", key: "weight", width: 150 },
+        { label: "Coleta (Kg/L)", key: "weight", width: 150 },
       ];
 
   if (rows.length === 0) {

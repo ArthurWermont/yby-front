@@ -135,7 +135,12 @@ export default function Reports() {
     const filtered = collections.filter(
       (collection: any) =>
         collection.pev.toLowerCase().includes(term) ||
-        collection?.cooperative?.cooperative_name?.toLowerCase().includes(term)
+        collection.waste.toLowerCase().includes(term) || // Tipo de Resíduos
+        (typeof collection.cooperative === "string"
+          ? collection.cooperative.toLowerCase().includes(term)
+          : collection.cooperative?.cooperative_name
+              ?.toLowerCase()
+              .includes(term))
     );
 
     setFilteredCollections(filtered);
@@ -171,7 +176,7 @@ export default function Reports() {
         <StyledActionsContainer>
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <TextField
-              label="Buscar por PEV"
+              label="Buscar"
               variant="outlined"
               value={searchTerm}
               onChange={handleSearchByName}

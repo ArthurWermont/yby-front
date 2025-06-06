@@ -101,7 +101,7 @@ const MyDocument = ({ rows }: any) => {
             <Text style={styles.tableCell}>Data | Horário</Text>
             <Text style={styles.tableCell}>PEV</Text>
             <Text style={styles.tableCell}>Tipo de Resíduos</Text>
-            <Text style={styles.tableCell}>Coleta (kg)</Text>
+            <Text style={styles.tableCell}>Coleta (Kg/L)</Text>
             <Text style={styles.tableCell}>Cooperativa</Text>
             <Text style={styles.tableCell}>Avaria</Text>
           </View>
@@ -120,7 +120,7 @@ const MyDocument = ({ rows }: any) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.text}>
-            Peso Total das Coletas: {totalWeight} kg
+            Peso Total das Coletas: {totalWeight} Kilos ou Litros
           </Text>
           <Text style={styles.text}>Total de Coletas: {rows.length}</Text>
           <Text style={styles.text}>
