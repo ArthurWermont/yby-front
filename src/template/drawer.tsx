@@ -16,6 +16,7 @@ import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 import * as React from "react";
 import { useContext } from "react";
@@ -112,6 +113,13 @@ export default function ResponsiveDrawerLayout(props: Props) {
                 onClick={() => navigate("/cadastro/cooperativa")}
               />
             </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }}>
+              <ListItemText
+                primary="Usuários"
+                onClick={() => navigate("/cadastro/users")}
+              />
+            </ListItemButton>
+
           </List>
         </Collapse>
 
@@ -134,28 +142,15 @@ export default function ResponsiveDrawerLayout(props: Props) {
             primary="Relatórios"
           />
         </ListItemButton>
-
-        <ListItemButton onClick={handleClickEditButton}>
+        <ListItemButton onClick={() => navigate("/dashboard")}>
           <ListItemIcon>
-            <EditIcon />
+            <AnalyticsIcon />
           </ListItemIcon>
           <ListItemText
             style={{ color: "black", fontWeight: "bold" }}
-            primary="Edição"
+            primary="Dashboard"
           />
-          {openEdit ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-
-        <Collapse in={openEdit} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              onClick={() => navigate("/edit/client")}
-            >
-              <ListItemText primary="Clientes" />
-            </ListItemButton>
-          </List>
-        </Collapse>
       </>
     );
   };

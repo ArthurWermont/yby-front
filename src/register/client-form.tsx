@@ -136,7 +136,7 @@ const schema = yup.object().shape({
 export default function ClientForm() {
   const [loading, setLoading] = useState(false);
 
-  const { control, handleSubmit, reset, setError } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       client_cnpj: "",
       client_socialName: "",
