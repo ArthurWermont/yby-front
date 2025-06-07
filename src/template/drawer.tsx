@@ -25,8 +25,8 @@ import EventIcon from "@mui/icons-material/Event";
 import FolderIcon from "@mui/icons-material/Folder";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
-import LogoutIcon from "@mui/icons-material/Logout";
 import EditIcon from "@mui/icons-material/Edit";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { AuthContext } from "../context/auth-context";
 
 const drawerWidth = 240;
@@ -132,6 +132,16 @@ export default function ResponsiveDrawerLayout(props: Props) {
           <ListItemText
             style={{ color: "black", fontWeight: "bold" }}
             primary="Relatórios"
+          />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => navigate("/dashboard")}>
+          <ListItemIcon>
+            <FolderIcon />
+          </ListItemIcon>
+          <ListItemText
+            style={{ color: "black", fontWeight: "bold" }}
+            primary="Dashboard"
           />
         </ListItemButton>
 
