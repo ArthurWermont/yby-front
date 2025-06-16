@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
 import {
   Bar,
@@ -35,42 +35,7 @@ import { getWastes } from "../api/wastes";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import DashboardPDF from "./pdf";
 
-const dataResiduos = [
-  { name: "Plástico", value: 30 },
-  { name: "Papel", value: 15 },
-  { name: "Vidro", value: 20 },
-  { name: "Metal", value: 35 },
-];
-
 const COLORS = ["#4B3838", "#1FA64C", "#8E44AD", "#F1592A"];
-
-const renderCustomizedLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-  index,
-}: any) => {
-  const RADIAN = Math.PI / 180;
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="#fff"
-      textAnchor="middle"
-      dominantBaseline="central"
-      fontSize={12}
-    >
-      {`${dataResiduos[index].value}%\n${dataResiduos[index].name}`}
-    </text>
-  );
-};
 
 // Estilizações
 const StyledContainer = styledComponents.div`
@@ -98,9 +63,41 @@ export default function Dashboard() {
   const [energiaData, setEnergiaData] = useState<
     { mes: string; mwh: number }[]
   >([]);
+  const [currentMonthEnergy, setCurrentMonthEnergy] = useState(0);
+  const [dataResiduos, setDataResiduos] = useState<
+    { name: string; value: number }[]
+  >([]);
   const consumedEnergy: { [key: string]: number } = {
     Plástico: 1.56,
     Papel: 5,
+  };
+
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index,
+  }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#fff"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={12}
+      >
+        {`${dataResiduos[index].value}%\n${dataResiduos[index].name}`}
+      </text>
+    );
   };
 
   const fetchOptionsPev = async () => {
@@ -164,7 +161,7 @@ export default function Dashboard() {
     );
     let endOfMonth = new Date(
       currentDate.getFullYear(),
-      currentDate.getMonth()+1,
+      currentDate.getMonth() + 1,
       0
     );
 
@@ -204,14 +201,11 @@ export default function Dashboard() {
             (sum: number, item: any) => sum + (parseFloat(item.weight) || 0),
             0
           );
-          const totalMwh = items.reduce(
-            (sum: number, item: any) => {
-              
-              const energy = parseFloat(item.weight)*consumedEnergy[item.wastes[0].name]
-              return sum + (energy  || 0);
-            },
-            0
-          );
+          const totalMwh = items.reduce((sum: number, item: any) => {
+            const energy =
+              parseFloat(item.weight) * consumedEnergy[item.wastes[0].name];
+            return sum + (energy || 0);
+          }, 0);
           resultDataLinha.push({
             mes: new Date(0, parseInt(month)).toLocaleString("default", {
               month: "short",
@@ -233,26 +227,52 @@ export default function Dashboard() {
     fetchData();
   }, [startDate, endDate, selectedPev, selectedTipo]);
 
-  // useEffect(() => {
-  //   const currentDate = new Date();
+  // current month data fetch
+  useEffect(() => {
+    const currentDate = new Date();
 
-  //   let startOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth(),
-  //     1
-  //   );
-  //   let endOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth()+1,
-  //     0
-  //   );
+    let startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    let endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
 
-  //   const fetchCurrentMonthData = async () => {
-  //     const response = await getCollectionByDate(startOfMonth, endOfMonth);
-      
-  //   }
-  //   fetchCurrentMonthData();
-  // }, [])
+    const fetchCurrentMonthData = async () => {
+      const response = await getCollectionByDate(startOfMonth, endOfMonth);
+      const totalEnergy = response?.data.reduce((sum, item) => {
+        // get the month energy consumed
+        const energy =
+          parseFloat(item.weight) * consumedEnergy[item.wastes[0].name];
+        return sum + (energy || 0);
+      }, 0);
+      const itemsPercentage: { [key: string]: number } = response?.data.reduce(
+        (acc: any, item: any) => {
+          const wasteName = item.wastes[0].name;
+          acc[wasteName] = (acc[wasteName] || 0) + parseFloat(item.weight);
+          return acc;
+        },
+        {}
+      );
+      const totalWeight = Object.values(itemsPercentage).reduce(
+        (sum: number, weight: number) => sum + weight,
+        0
+      );
+      const percentageData = Object.entries(itemsPercentage).map(
+        ([name, weight]) => ({
+          name,
+          value: Number(((weight / totalWeight) * 100).toFixed(2)),
+        })
+      );
+      setDataResiduos(percentageData);
+      setCurrentMonthEnergy(totalEnergy.toFixed(2) || 0);
+    };
+    fetchCurrentMonthData();
+  }, []);
 
   return (
     <StyledContainer>
@@ -274,10 +294,12 @@ export default function Dashboard() {
               <DashboardPDF
                 dataLinhaState={dataLinhaState}
                 energiaData={energiaData}
+                dataResiduos={dataResiduos}
                 selectedPev={selectedPev}
                 selectedTipo={selectedTipo}
                 startDate={startDate}
                 endDate={endDate}
+                currentMonthEnergy={currentMonthEnergy}
               />
             }
             fileName="dashboard-report.pdf"
@@ -430,7 +452,7 @@ export default function Dashboard() {
                 Este mês
               </Typography>
               <Typography fontWeight={600} fontSize={14}>
-                Consumo de Energia 15.200 MWh
+                Consumo de Energia {currentMonthEnergy} MWh
               </Typography>
             </Box>
           </Paper>

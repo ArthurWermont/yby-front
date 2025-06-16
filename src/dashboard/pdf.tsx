@@ -11,13 +11,20 @@ interface EnergyItem {
   mwh: number;
 }
 
+interface WasteItem {
+  name: string;
+  value: number;
+}
+
 interface DashboardPDFProps {
   dataLinhaState: DataItem[];
   energiaData: EnergyItem[];
+  dataResiduos: WasteItem[];
   selectedPev: string | null;
   selectedTipo: string | null;
   startDate: string;
   endDate: string;
+  currentMonthEnergy: number;
 }
 
 const styles = StyleSheet.create({
@@ -100,6 +107,40 @@ const styles = StyleSheet.create({
     fontSize: 8,
     textAlign: "center",
     color: "#666",
+  },
+  currentMonthCard: {
+    backgroundColor: "#FAF1E8",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  cardTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#F1592A",
+    marginBottom: 5,
+  },
+  cardValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#4B3838",
+  },
+  wastesDistribution: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: "#FAF1E8",
+    borderRadius: 5,
+  },
+  wasteItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+    padding: 5,
+  },
+  colorBox: {
+    width: 12,
+    height: 12,
+    marginRight: 5,
   }
 });
 
@@ -107,13 +148,17 @@ const formatNumber = (value: number) => {
   return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+const COLORS = ["#4B3838", "#1FA64C", "#8E44AD", "#F1592A"];
+
 const DashboardPDF = ({ 
   dataLinhaState, 
   energiaData,
+  dataResiduos,
   selectedPev,
   selectedTipo,
   startDate,
-  endDate 
+  endDate,
+  currentMonthEnergy
 }: DashboardPDFProps) => {
   const totalWeight = dataLinhaState.reduce((sum: number, item: DataItem) => sum + item.peso, 0);
   const totalEnergy = energiaData.reduce((sum: number, item: EnergyItem) => sum + item.mwh, 0);
@@ -137,11 +182,16 @@ const DashboardPDF = ({
           </Text>
         </View>
 
+        {/* Card do mês atual */}
+        <View style={styles.currentMonthCard}>
+          <Text style={styles.cardTitle}>Energia Economizada no Mês Atual</Text>
+          <Text style={styles.cardValue}>{formatNumber(currentMonthEnergy)} MWh</Text>
+        </View>
+
+        {/* Tabela de dados mensais */}
         <View style={styles.section}>
-          <Text style={styles.summaryTitle}>
-            Resumo das Coletas
-          </Text>
-          <View style={[styles.table, { marginTop: 10 }]}>
+          <Text style={styles.summaryTitle}>Resumo das Coletas</Text>
+          <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeader]}>
               <Text style={styles.tableCell}>Mês</Text>
               <Text style={styles.tableCell}>Peso (kg)</Text>
@@ -157,11 +207,27 @@ const DashboardPDF = ({
           </View>
         </View>
 
+        {/* Distribuição de Resíduos */}
+        <View style={styles.wastesDistribution}>
+          <Text style={styles.summaryTitle}>Distribuição de Resíduos</Text>
+          {dataResiduos.map((item: WasteItem, index: number) => (
+            <View key={index} style={styles.wasteItem}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.colorBox, { backgroundColor: COLORS[index % COLORS.length] }]} />
+                <Text style={styles.summaryText}>{item.name}</Text>
+              </View>
+              <Text style={styles.summaryText}>{formatNumber(item.value)}%</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Totais */}
         <View style={styles.summaryBox}>
           <Text style={styles.summaryTitle}>Totais do Período</Text>
           <Text style={styles.summaryText}>Total de Peso Coletado: {formatNumber(totalWeight)} kg</Text>
           <Text style={styles.summaryText}>Total de Energia Economizada: {formatNumber(totalEnergy)} MWh</Text>
           <Text style={styles.summaryText}>Total de Meses: {dataLinhaState.length}</Text>
+          <Text style={styles.summaryText}>Tipos de Resíduos: {dataResiduos.length}</Text>
         </View>
 
         <Text style={styles.footer}>
