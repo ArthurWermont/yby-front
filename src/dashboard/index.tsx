@@ -1,13 +1,10 @@
-import { EnergySavingsLeaf, SolarPower, WaterDrop } from "@mui/icons-material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ForestIcon from "@mui/icons-material/Forest";
-import GroupIcon from "@mui/icons-material/Group"; // para pessoas impactadas (mais sugestivo que repetir ícone de petróleo)
-import OilBarrelIcon from "@mui/icons-material/OilBarrel";
+import { EnergySavingsLeaf } from "@mui/icons-material";
 import {
   Box,
   Button,
   Divider,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -15,7 +12,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import CloseIcon from '@mui/icons-material/Close';
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -31,40 +29,17 @@ import {
   YAxis,
 } from "recharts";
 import { styled as styledComponents } from "styled-components";
-
-// Dados do gráfico
-const datalinha = [
-  { mes: "Jan", peso: 20 },
-  { mes: "Fev", peso: 42 },
-  { mes: "Mar", peso: 31 },
-  { mes: "Abr", peso: 65 },
-  { mes: "Mai", peso: 40 },
-  { mes: "Jun", peso: 55 },
-];
-
-const energiaData = [
-  { mes: "Jan", kwh: 3200 },
-  { mes: "Fev", kwh: 4600 },
-  { mes: "Mar", kwh: 3500 },
-  { mes: "Abr", kwh: 4900 },
-  { mes: "Mai", kwh: 2100 },
-  { mes: "Jun", kwh: 4300 },
-];
+import { getCollectionByDate } from "../api/collection";
+import { getClientsByCNPJs } from "../api/client";
+import { getWastes } from "../api/wastes";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import DashboardPDF from "./pdf";
 
 const dataResiduos = [
   { name: "Plástico", value: 30 },
   { name: "Papel", value: 15 },
   { name: "Vidro", value: 20 },
   { name: "Metal", value: 35 },
-];
-
-const aguaData = [
-  { mes: "Jan", litros: 120 },
-  { mes: "Fev", litros: 380 },
-  { mes: "Mar", litros: 290 },
-  { mes: "Abr", litros: 410 },
-  { mes: "Mai", litros: 320 },
-  { mes: "Jun", litros: 330 },
 ];
 
 const COLORS = ["#4B3838", "#1FA64C", "#8E44AD", "#F1592A"];
@@ -111,10 +86,173 @@ const StyledCenterContainer = styledComponents.div`
 `;
 
 export default function Dashboard() {
+  const [dataLinhaState, setDataLinhaState] = useState<
+    { mes: string; peso: number }[]
+  >([]);
   const [selectedPev, setSelectedPev] = useState("");
   const [selectedTipo, setSelectedTipo] = useState("");
-  const [selectedPeriodo, setSelectedPeriodo] = useState("");
-  const [research, setResearch] = useState("");
+  const [optionsPev, setOptionsPev] = useState([]);
+  const [optionsResiduos, setOptionsResiduos] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [energiaData, setEnergiaData] = useState<
+    { mes: string; mwh: number }[]
+  >([]);
+  const consumedEnergy: { [key: string]: number } = {
+    Plástico: 1.56,
+    Papel: 5,
+  };
+
+  const fetchOptionsPev = async () => {
+    try {
+      const response = await getClientsByCNPJs([]);
+      const clients = response.data.map((client: any) => ({
+        label: client.social_name,
+        value: client.documentId,
+      }));
+      setOptionsPev(clients);
+    } catch (error) {
+      console.error("Erro ao buscar PEVs:", error);
+    }
+  };
+
+  const fetchOptionsResiduos = async () => {
+    // Simulação de opções de resíduos
+    try {
+      const response = await getWastes();
+      if (response && response.data) {
+        const residuos = response.data.map((waste: any) => ({
+          label: waste.name,
+          value: waste.id,
+        }));
+        setOptionsResiduos(residuos);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar opções de resíduos:", error);
+    }
+  };
+
+  function applyFiltersToResponse(response: { data: any[] } | null) {
+    if (!response || !response.data) {
+      return;
+    }
+
+    // Filtrar por PEV selecionado
+    if (selectedPev) {
+      response.data = response.data.filter(
+        (item: any) => item.client.documentId === selectedPev
+      );
+    }
+
+    // Filtrar por tipo de resíduo selecionado
+    if (selectedTipo) {
+      response.data = response.data.filter(
+        (item: any) => item.wastes[0].id === selectedTipo
+      );
+    }
+
+    return response;
+  }
+
+  useEffect(() => {
+    const currentDate = new Date();
+
+    let startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 5,
+      1
+    );
+    let endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth()+1,
+      0
+    );
+
+    if (startDate) {
+      startOfMonth = new Date(startDate);
+    }
+
+    if (endDate) {
+      endOfMonth = new Date(endDate);
+    }
+
+    const fetchData = async () => {
+      // fetch options for PEV
+      fetchOptionsPev();
+      fetchOptionsResiduos();
+
+      const resultDataLinha: { mes: string; peso: number }[] = [];
+      const energiaData: { mes: string; mwh: number }[] = [];
+
+      const response = await getCollectionByDate(startOfMonth, endOfMonth);
+      applyFiltersToResponse(response);
+      if (response) {
+        const responseByMonth: { [key: string]: { weight: number }[] } =
+          response.data.reduce((acc: any, item: any) => {
+            const itemDate = new Date(item.createdAt);
+            const month = itemDate.getMonth();
+            if (!acc[month]) {
+              acc[month] = [];
+            }
+
+            acc[month].push(item);
+            return acc;
+          }, {});
+        // Calcular o peso e energia total por mês
+        Object.entries(responseByMonth).forEach(([month, items]) => {
+          const totalWeight = items.reduce(
+            (sum: number, item: any) => sum + (parseFloat(item.weight) || 0),
+            0
+          );
+          const totalMwh = items.reduce(
+            (sum: number, item: any) => {
+              
+              const energy = parseFloat(item.weight)*consumedEnergy[item.wastes[0].name]
+              return sum + (energy  || 0);
+            },
+            0
+          );
+          resultDataLinha.push({
+            mes: new Date(0, parseInt(month)).toLocaleString("default", {
+              month: "short",
+            }),
+            peso: Number(totalWeight.toFixed(2)),
+          });
+          energiaData.push({
+            mes: new Date(0, parseInt(month)).toLocaleString("default", {
+              month: "short",
+            }),
+            mwh: Number(totalMwh.toFixed(2)),
+          });
+        });
+      }
+      setEnergiaData(energiaData);
+      setDataLinhaState(resultDataLinha);
+    };
+
+    fetchData();
+  }, [startDate, endDate, selectedPev, selectedTipo]);
+
+  // useEffect(() => {
+  //   const currentDate = new Date();
+
+  //   let startOfMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1
+  //   );
+  //   let endOfMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth()+1,
+  //     0
+  //   );
+
+  //   const fetchCurrentMonthData = async () => {
+  //     const response = await getCollectionByDate(startOfMonth, endOfMonth);
+      
+  //   }
+  //   fetchCurrentMonthData();
+  // }, [])
 
   return (
     <StyledContainer>
@@ -131,16 +269,33 @@ export default function Dashboard() {
           >
             Dashboard
           </Typography>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#2E7D32",
-              textTransform: "none",
-              fontWeight: 500,
-            }}
+          <PDFDownloadLink
+            document={
+              <DashboardPDF
+                dataLinhaState={dataLinhaState}
+                energiaData={energiaData}
+                selectedPev={selectedPev}
+                selectedTipo={selectedTipo}
+                startDate={startDate}
+                endDate={endDate}
+              />
+            }
+            fileName="dashboard-report.pdf"
           >
-            BAIXAR DASHBOARD
-          </Button>
+            {({ loading }) => (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#2E7D32",
+                  textTransform: "none",
+                  fontWeight: 500,
+                }}
+                disabled={loading}
+              >
+                {loading ? "Gerando..." : "BAIXAR DASHBOARD"}
+              </Button>
+            )}
+          </PDFDownloadLink>
         </div>
 
         <Divider style={{ marginTop: 8, marginBottom: 24 }} />
@@ -161,11 +316,26 @@ export default function Dashboard() {
                 value={selectedPev}
                 onChange={(e) => setSelectedPev(e.target.value)}
                 label="Selecionar PEV"
+                endAdornment={
+                  selectedPev ? (
+                    <IconButton
+                      size="small"
+                      sx={{ marginRight: 2 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPev("");
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  ) : null
+                }
               >
-                <MenuItem value="plastico">Plástico</MenuItem>
-                <MenuItem value="vidro">Vidro</MenuItem>
-                <MenuItem value="papel">Papel</MenuItem>
-                <MenuItem value="metal">Metal</MenuItem>
+                {optionsPev.map((option: any) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 
@@ -176,34 +346,46 @@ export default function Dashboard() {
                 value={selectedTipo}
                 onChange={(e) => setSelectedTipo(e.target.value)}
                 label="Tipo de resíduo"
+                endAdornment={
+                  selectedTipo ? (
+                    <IconButton
+                      size="small"
+                      sx={{ marginRight: 2 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTipo("");
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  ) : null
+                }
               >
-                <MenuItem value="plastico">Plástico</MenuItem>
-                <MenuItem value="vidro">Vidro</MenuItem>
-                <MenuItem value="papel">Papel</MenuItem>
-                <MenuItem value="metal">Metal</MenuItem>
+                {optionsResiduos.map((option: any) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: 230 }}>
-              <InputLabel id="periodo-label">Selecionar período</InputLabel>
-              <Select
-                labelId="periodo-label"
-                value={selectedPeriodo}
-                onChange={(e) => setSelectedPeriodo(e.target.value)}
-                label="Selecionar período"
-              >
-                <MenuItem value="jan-mar">Jan - Mar</MenuItem>
-                <MenuItem value="abr-jun">Abr - Jun</MenuItem>
-              </Select>
-            </FormControl>
+            <TextField
+              type="date"
+              label="Data inicial"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              size="small"
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              type="date"
+              label="Data final"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              size="small"
+              InputLabelProps={{ shrink: true }}
+            />
           </Box>
-
-          <TextField
-            placeholder="Pesquisar"
-            value={research}
-            onChange={(e) => setResearch(e.target.value)}
-            sx={{ width: 300 }}
-          />
         </Box>
         <Box
           sx={{
@@ -248,133 +430,7 @@ export default function Dashboard() {
                 Este mês
               </Typography>
               <Typography fontWeight={600} fontSize={14}>
-                Economia de Energia 15.200 kWh
-              </Typography>
-            </Box>
-          </Paper>
-
-          {/* CARD 2 */}
-          <Paper
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              padding: "12px 16px",
-              borderRadius: 3,
-              backgroundColor: "#FAF1E8",
-              // minWidth: 260,
-              // maxWidth: 280,
-              width: 250,
-              marginLeft: 1,
-            }}
-            elevation={1}
-          >
-            <Box
-              sx={{
-                backgroundColor: "#005C87",
-                padding: 1.5,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 44,
-                height: 44,
-              }}
-            >
-              <WaterDrop sx={{ color: "white", fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="gray">
-                Este mês
-              </Typography>
-              <Typography fontWeight={600} fontSize={14}>
-                Economia de Água 22.050L
-              </Typography>
-            </Box>
-          </Paper>
-
-          {/* CARD 3 */}
-          <Paper
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              padding: "12px 16px",
-              borderRadius: 3,
-              backgroundColor: "#FAF1E8",
-              // minWidth: 260,
-              // maxWidth: 280,
-              width: 250,
-              marginLeft: 1,
-            }}
-            elevation={1}
-          >
-            <Box
-              sx={{
-                backgroundColor: "purple",
-                padding: 1.5,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 44,
-                height: 44,
-              }}
-            >
-              <SolarPower sx={{ color: "white", fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="gray">
-                Este mês
-              </Typography>
-              <Typography fontWeight={600} fontSize={14}>
-                Pessoas impactadas
-              </Typography>
-              <Typography fontWeight={600} fontSize={14}>
-                +50
-              </Typography>
-            </Box>
-          </Paper>
-
-          {/* CARD 4 */}
-          <Paper
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              padding: "12px 16px",
-              borderRadius: 3,
-              backgroundColor: "#FAF1E8",
-              // minWidth: 260,
-              // maxWidth: 280,
-              width: 250,
-              marginLeft: 1,
-            }}
-            elevation={1}
-          >
-            <Box
-              sx={{
-                backgroundColor: "#4B3838",
-                padding: 1.5,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 44,
-                height: 44,
-              }}
-            >
-              <GroupIcon sx={{ color: "white", fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography variant="caption" color="gray">
-                Este mês
-              </Typography>
-              <Typography fontWeight={600} fontSize={14}>
-                Pessoas impactadas
-              </Typography>
-              <Typography fontWeight={600} fontSize={14}>
-                +50
+                Consumo de Energia 15.200 MWh
               </Typography>
             </Box>
           </Paper>
@@ -406,11 +462,11 @@ export default function Dashboard() {
               Coleta em peso (kg) por mês
             </Typography>
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={datalinha}>
+              <LineChart data={dataLinhaState}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} />
                 <XAxis dataKey="mes" />
                 <YAxis
-                  domain={[10, 75]}
+                  // domain={[10, 12]}
                   tickFormatter={(value) => `${value}kg`}
                 />
                 <Tooltip formatter={(value: number) => `${value} kg`} />
@@ -465,99 +521,7 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </Paper>
-
-            {/* Cards Economia+ */}
-            <Box display="flex" flexDirection="column" gap={2}>
-              {[
-                {
-                  icon: <OilBarrelIcon sx={{ color: "white" }} />,
-                  bg: "#005C87",
-                  label: "PETRÓLEO",
-                  value: 1200 + "L",
-                },
-                {
-                  icon: <ForestIcon sx={{ color: "white" }} />,
-                  bg: "#1FA64C",
-                  label: "ÁRVORES POUPADAS",
-                  value: 122,
-                },
-                {
-                  icon: <DeleteIcon sx={{ color: "white" }} />,
-                  bg: "#4B3838",
-                  label: "ESPAÇO EM ATERRO SANITÁRIO (m²)",
-                  value: 3000 + "M²",
-                },
-              ].map((item, i) => (
-                <Paper
-                  key={i}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    padding: 2,
-                    borderRadius: 3,
-                    backgroundColor: "#FAF1E8",
-                  }}
-                  elevation={1}
-                >
-                  <Box
-                    sx={{
-                      backgroundColor: item.bg,
-                      padding: 1.5,
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {item.icon}
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="gray">
-                      {item.label}
-                    </Typography>
-                    <Typography fontWeight={600}>{item.value}</Typography>
-                  </Box>
-                </Paper>
-              ))}
-            </Box>
           </Box>
-
-          {/* Economia de Água */}
-          <Paper
-            elevation={1}
-            sx={{
-              backgroundColor: "#FAF1E8",
-              padding: 3,
-              borderRadius: 3,
-              minHeight: 300,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 500, color: "#4B3838", mb: 2 }}
-            >
-              Economia de Água (L) por mês
-            </Typography>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={aguaData}>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} />
-                <XAxis dataKey="mes" />
-                <YAxis
-                  domain={[100, 500]}
-                  tickFormatter={(value) => `${value}L`}
-                />
-                <Tooltip formatter={(value: number) => `${value} L`} />
-                <Line
-                  type="linear"
-                  dataKey="litros"
-                  stroke="#0070C0"
-                  strokeWidth={2}
-                  dot={{ fill: "white", strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </Paper>
 
           {/* Economia de Energia */}
           <Paper
@@ -573,16 +537,16 @@ export default function Dashboard() {
               variant="subtitle1"
               sx={{ fontWeight: 500, color: "#4B3838", mb: 2 }}
             >
-              Economia de Energia (kWh) por mês
+              Consumo de Energia (MWh) por mês
             </Typography>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={energiaData}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} />
                 <XAxis dataKey="mes" />
                 <YAxis tickFormatter={(value) => `${value}`} />
-                <Tooltip formatter={(value: number) => `${value} kWh`} />
+                <Tooltip formatter={(value: number) => `${value} MWh`} />
                 <Bar
-                  dataKey="kwh"
+                  dataKey="mwh"
                   fill="#F1592A"
                   radius={[10, 10, 0, 0]}
                   barSize={10}
