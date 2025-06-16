@@ -73,6 +73,39 @@ const getCollection = async () => {
   }
 };
 
+const getCollectionByDate = async (startDate: Date, endDate: Date) => {
+  try {
+    // Get first page to check total pages
+    const firstResponse = await api.get(
+      `/collections?filters[$and][0][createdAt][$gte]=${startDate.toISOString()}&filters[$and][1][createdAt][$lte]=${endDate.toISOString()}&populate=*&pagination[page]=1&pagination[pageSize]=100`
+    );
+
+    const totalPages = firstResponse.data.meta.pagination.pageCount;
+
+    // Create array of requests for all pages
+    const requests = [];
+    for (let page = 1; page <= totalPages; page++) {
+      requests.push(
+        api.get(
+          `/collections?filters[$and][0][createdAt][$gte]=${startDate.toISOString()}&filters[$and][1][createdAt][$lte]=${endDate.toISOString()}&populate=*&pagination[page]=${page}&pagination[pageSize]=100`
+        )
+      );
+    }
+
+    // Wait for all requests to complete
+    const responses = await Promise.all(requests);
+
+    // Combine data from all pages
+    const data = responses.map((response) => response.data);
+    const joinData = data.flatMap((item) => item.data);
+
+    return { data: joinData };
+  } catch (error) {
+    console.error("Erro ao buscar as coletas deste mês:", error);
+    return null;
+  }
+}
+
 const getCollectionClient = async ({
   documentId,
 }: {
@@ -127,5 +160,6 @@ export {
   editCollection,
   getCollection,
   getCollectionClient,
+  getCollectionByDate,
   uploadImage,
 };

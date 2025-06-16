@@ -5,11 +5,12 @@ import ResponsiveDrawerLayout from "../template/drawer";
 
 import { useContext } from "react";
 import { AuthContext } from "../context/auth-context";
+import Dashboard from "../dashboard";
+import Edit from "../edit";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
 import Reports from "../reports";
-import Edit from "../edit";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -38,6 +39,7 @@ const MainRoutes = () => {
                   path="/cadastro"
                   element={<Navigate to="/cadastro/cliente" />}
                 />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route
                   path="/cadastro/cliente"
                   element={<Register type="cliente" />}
@@ -46,11 +48,11 @@ const MainRoutes = () => {
                   path="/cadastro/cooperativa"
                   element={<Register type="cooperativa" />}
                 />
-                <Route path="/editar" element={<Navigate to="/edit/client" />} />
                 <Route
-                  path="/edit/client"
-                  element={<Edit type="cliente" />}
+                  path="/editar"
+                  element={<Navigate to="/edit/client" />}
                 />
+                <Route path="/edit/client" element={<Edit type="cliente" />} />
                 <Route path="/planejamento" element={<PlanningList />} />
                 <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />
