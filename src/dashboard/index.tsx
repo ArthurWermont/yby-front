@@ -1,4 +1,10 @@
-import { EnergySavingsLeaf } from "@mui/icons-material";
+import {
+  EnergySavingsLeaf,
+  WaterDrop,
+  OilBarrel,
+  Forest,
+  Delete,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -64,40 +70,27 @@ export default function Dashboard() {
     { mes: string; mwh: number }[]
   >([]);
   const [currentMonthEnergy, setCurrentMonthEnergy] = useState(0);
+  const [currentMonthAgua, setCurrentMonthAgua] = useState(0);
   const [dataResiduos, setDataResiduos] = useState<
     { name: string; value: number }[]
   >([]);
+  const [aguaDataLinha, setAguaDataLinha] = useState<
+    { mes: string; litros: number }[]
+  >([]);
+  const [treeData, setTreeData] = useState(0);
+  const [savedOilData, setSavedOilData] = useState(0);
   const consumedEnergy: { [key: string]: number } = {
     Plástico: 1.56,
     Papel: 5,
   };
-
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    index,
-  }: any) => {
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="#fff"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={12}
-      >
-        {`${dataResiduos[index].value}%\n${dataResiduos[index].name}`}
-      </text>
-    );
+  const consumedWater: { [key: string]: number } = {
+    Plástico: 3.03, // Exemplo de consumo de água por kg de plástico
+    Papel: 2.6, // Exemplo de consumo de água por kg de papel
+  };
+  const savedOil: { [key: string]: number } = {
+    Plástico: 1.266,
+    Papel: 51.7,
+    Metal: 3.595
   };
 
   const fetchOptionsPev = async () => {
@@ -180,6 +173,7 @@ export default function Dashboard() {
 
       const resultDataLinha: { mes: string; peso: number }[] = [];
       const energiaData: { mes: string; mwh: number }[] = [];
+      const resultAguaDataLinha: { mes: string; litros: number }[] = [];
 
       const response = await getCollectionByDate(startOfMonth, endOfMonth);
       applyFiltersToResponse(response);
@@ -206,6 +200,12 @@ export default function Dashboard() {
               parseFloat(item.weight) * consumedEnergy[item.wastes[0].name];
             return sum + (energy || 0);
           }, 0);
+          const totalLitros = items.reduce((sum: number, item: any) => {
+            // Assuming a conversion factor for water savings
+            const litros =
+              parseFloat(item.weight) * consumedWater[item.wastes[0].name]; // Example conversion
+            return sum + (litros || 0);
+          }, 0);
           resultDataLinha.push({
             mes: new Date(0, parseInt(month)).toLocaleString("default", {
               month: "short",
@@ -218,10 +218,17 @@ export default function Dashboard() {
             }),
             mwh: Number(totalMwh.toFixed(2)),
           });
+          resultAguaDataLinha.push({
+            mes: new Date(0, parseInt(month)).toLocaleString("default", {
+              month: "short",
+            }),
+            litros: Number(totalLitros.toFixed(2)),
+          });
         });
       }
       setEnergiaData(energiaData);
       setDataLinhaState(resultDataLinha);
+      setAguaDataLinha(resultAguaDataLinha);
     };
 
     fetchData();
@@ -242,6 +249,14 @@ export default function Dashboard() {
       0
     );
 
+    if (startDate) {
+      startOfMonth = new Date(startDate);
+    }
+
+    if (endDate) {
+      endOfMonth = new Date(endDate);
+    }
+
     const fetchCurrentMonthData = async () => {
       const response = await getCollectionByDate(startOfMonth, endOfMonth);
       const totalEnergy = response?.data.reduce((sum, item) => {
@@ -249,6 +264,25 @@ export default function Dashboard() {
         const energy =
           parseFloat(item.weight) * consumedEnergy[item.wastes[0].name];
         return sum + (energy || 0);
+      }, 0);
+      const totalTree = response?.data.reduce((sum, item) => {
+        // get the month trees saved
+        const tree =
+          parseFloat(item.weight) *
+          (item.wastes[0].name === "Papel" ? 1 / 45 : 0);
+        return sum + (tree || 0);
+      }, 0);
+      const totalWater = response?.data.reduce((sum, item) => {
+        // get the month water consumed
+        const water =
+          parseFloat(item.weight) * consumedWater[item.wastes[0].name];
+        return sum + (water || 0);
+      }, 0);
+      const totalPetroleo = response?.data.reduce((sum, item) => {
+        // get the month oil consumed
+        const oil =
+          parseFloat(item.weight) * savedOil[item.wastes[0].name];
+        return sum + (oil || 0);
       }, 0);
       const itemsPercentage: { [key: string]: number } = response?.data.reduce(
         (acc: any, item: any) => {
@@ -270,9 +304,12 @@ export default function Dashboard() {
       );
       setDataResiduos(percentageData);
       setCurrentMonthEnergy(totalEnergy.toFixed(2) || 0);
+      setCurrentMonthAgua(totalWater.toFixed(2) || 0);
+      setTreeData(totalTree.toFixed(2) || 0);
+      setSavedOilData(totalPetroleo.toFixed(2) || 0);
     };
     fetchCurrentMonthData();
-  }, []);
+  }, [startDate, endDate]);
 
   return (
     <StyledContainer>
@@ -456,6 +493,45 @@ export default function Dashboard() {
               </Typography>
             </Box>
           </Paper>
+          {/* CARD 2 */}
+          <Paper
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              padding: "12px 16px",
+              borderRadius: 3,
+              backgroundColor: "#FAF1E8",
+              // minWidth: 260,
+              // maxWidth: 280,
+              width: 250,
+              marginLeft: 1,
+            }}
+            elevation={1}
+          >
+            <Box
+              sx={{
+                backgroundColor: "#005C87",
+                padding: 1.5,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 44,
+                height: 44,
+              }}
+            >
+              <WaterDrop sx={{ color: "white", fontSize: 22 }} />
+            </Box>
+            <Box>
+              <Typography variant="caption" color="gray">
+                Este mês
+              </Typography>
+              <Typography fontWeight={600} fontSize={14}>
+                Economia de Água {currentMonthAgua}L
+              </Typography>
+            </Box>
+          </Paper>
         </Box>
 
         <Box
@@ -527,7 +603,6 @@ export default function Dashboard() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={renderCustomizedLabel}
                     outerRadius={90}
                     innerRadius={30}
                     paddingAngle={3}
@@ -542,8 +617,122 @@ export default function Dashboard() {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+              {/* Legend for PieChart */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  mt: 2,
+                  gap: 1,
+                }}
+              >
+                {dataResiduos.map((entry, index) => (
+                  <Box
+                    key={entry.name}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        backgroundColor: COLORS[index % COLORS.length],
+                        borderRadius: "50%",
+                        mr: 1,
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ color: "#4B3838" }}>
+                      <b>{entry.name}</b> {entry.value}%
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </Paper>
+            <Box display="flex" flexDirection="column" gap={2}>
+              {[
+                {
+                  icon: <OilBarrel sx={{ color: "white" }} />,
+                  bg: "#005C87",
+                  label: "PETRÓLEO",
+                  value: savedOilData + "L",
+                },
+                {
+                  icon: <Forest sx={{ color: "white" }} />,
+                  bg: "#1FA64C",
+                  label: "ÁRVORES POUPADAS",
+                  value: treeData + " Árvores",
+                },
+                {
+                  icon: <Delete sx={{ color: "white" }} />,
+                  bg: "#4B3838",
+                  label: "ESPAÇO EM ATERRO SANITÁRIO (m²)",
+                  value: 3000 + "M²",
+                },
+              ].map((item, i) => (
+                <Paper
+                  key={i}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    padding: 2,
+                    borderRadius: 3,
+                    backgroundColor: "#FAF1E8",
+                  }}
+                  elevation={1}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: item.bg,
+                      padding: 1.5,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="gray">
+                      {item.label}
+                    </Typography>
+                    <Typography fontWeight={600}>{item.value}</Typography>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
           </Box>
+          <Paper
+            elevation={1}
+            sx={{
+              backgroundColor: "#FAF1E8",
+              padding: 3,
+              borderRadius: 3,
+              minHeight: 300,
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 500, color: "#4B3838", mb: 2 }}
+            >
+              Economia de Água (L) por mês
+            </Typography>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={aguaDataLinha}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="mes" />
+                <YAxis tickFormatter={(value) => `${value}L`} />
+                <Tooltip formatter={(value: number) => `${value} L`} />
+                <Line
+                  type="linear"
+                  dataKey="litros"
+                  stroke="#0070C0"
+                  strokeWidth={2}
+                  dot={{ fill: "white", strokeWidth: 2, r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Paper>
 
           {/* Economia de Energia */}
           <Paper
