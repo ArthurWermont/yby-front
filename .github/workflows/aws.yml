@@ -14,65 +14,54 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Save repository as zip
-        run: zip -r yby-front-app.zip .
-
-      - name: Install rsync
-        run: sudo apt-get update && sudo apt-get install -y rsync
-
-      - name: Save EC2 private key
         run: |
-          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
+          zip -r yby-front-app.zip .
+
+      - name: Clean up
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            rm -rf /home/ubuntu/yby-front-app.zip
+            rm -rf /home/ubuntu/yby-front-app
 
       - name: Copy to EC2
-        run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ec2_key.pem" \
-          yby-front-app.zip ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "yby-front-app.zip"
+          target: "/home/ubuntu"
 
-      - name: SSH into EC2 and deploy Docker
-        run: |
-            ssh -i ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-              set -e
-              sudo apt-get update -y
-              sudo apt-get install -y unzip docker.io
-              sudo usermod -aG docker $USER
-              sudo systemctl enable --now docker
+      - name: SSH into EC2 and run Docker
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            sudo apt-get update -y
+            sudo apt-get install -y unzip 
+            sudo apt-get install -y docker
+            sudo usermod -aG docker $USER
+            sudo systemctl start docker
+            sudo systemctl enable docker
 
-              # Backup do deploy anterior para rollback
-              if [ -d "/home/ubuntu/yby-front-app" ]; then
-                mv /home/ubuntu/yby-front-app /home/ubuntu/yby-front-app-backup-$(date +%s)
-              fi
+            if [ -d "/home/ubuntu/yby-front-app" ]; then
+              sudo rm -rf /home/ubuntu/yby-front-app
+            fi
+            unzip /home/ubuntu/yby-front-app.zip -d /home/ubuntu/yby-front-app
+            cd /home/ubuntu/yby-front-app
 
-              # Descompactar novo deploy
-              unzip /home/ubuntu/yby-front-app.zip -d /home/ubuntu/yby-front-app
-              cd /home/ubuntu/yby-front-app
+            sudo docker ps -q | xargs -r sudo docker stop
+            sudo docker rm $(sudo docker ps -aq)
+            sudo docker rmi $(sudo docker images -q)
+            sudo docker volume prune -f
+            sudo docker network prune -f
+            sudo docker system prune -a --volumes -f
 
-              # Parar e remover containers antigos
-              sudo docker ps -q | xargs -r sudo docker stop || true
-              sudo docker ps -aq | xargs -r sudo docker rm || true
-              sudo docker images -q | xargs -r sudo docker rmi || true
-              sudo docker volume prune -f
-              sudo docker network prune -f
-              sudo docker system prune -a --volumes -f
-
-              # Build e run do novo container
-              if sudo docker build -t yby-front-app . && sudo docker run -d -p 80:80 yby-front-app; then
-                echo "Deploy realizado com sucesso."
-                # Remover backup antigo se o deploy foi bem-sucedido
-                find /home/ubuntu/ -maxdepth 1 -name 'yby-front-app-backup-*' -type d -exec rm -rf {} +
-              else
-                echo "Erro no deploy! Restaurando backup."
-                rm -rf /home/ubuntu/yby-front-app
-                # Restaurar backup mais recente
-                latest_backup=$(ls -td /home/ubuntu/yby-front-app-backup-* | head -1)
-                if [ -n "$latest_backup" ]; then
-                  mv "$latest_backup" /home/ubuntu/yby-front-app
-                  cd /home/ubuntu/yby-front-app
-                  sudo docker build -t yby-front-app .
-                  sudo docker run -d -p 80:80 yby-front-app
-                  echo "Rollback realizado."
-                else
-                  echo "Nenhum backup encontrado para rollback."
-                fi
-              fi
-            EOF
+            sudo docker build -t yby-front-app .
+            sudo docker run -d -p 80:80 yby-front-app
