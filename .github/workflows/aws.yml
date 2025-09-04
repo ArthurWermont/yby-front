@@ -18,7 +18,7 @@ jobs:
           zip -r yby-front-app.zip .
 
       - name: Clean up
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
@@ -37,7 +37,7 @@ jobs:
           target: "/home/ubuntu"
 
       - name: SSH into EC2 and run Docker
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
