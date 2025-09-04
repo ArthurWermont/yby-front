@@ -19,14 +19,19 @@ jobs:
       - name: Install rsync
         run: sudo apt-get update && sudo apt-get install -y rsync
 
+      - name: Save EC2 private key
+        run: |
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+
       - name: Copy to EC2
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_PRIVATE_KEY }}" \
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ec2_key.pem" \
           yby-front-app.zip ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
 
       - name: SSH into EC2 and deploy Docker
         run: |
-            ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+            ssh -i ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
               set -e
               sudo apt-get update -y
               sudo apt-get install -y unzip docker.io
