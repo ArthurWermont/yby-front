@@ -10,7 +10,7 @@ const uploadImage = async (file: any): Promise<any[]> => {
 
   try {
     // Envia os dados com fetch
-    const response = await fetch("http://3.88.210.55:1337/api/upload", {
+    const response = await fetch("https://back.somosyby.com/api/upload", {
       method: "POST",
       body: formData,
       headers: {

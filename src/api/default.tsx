@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiDefault = axios.create({
-  baseURL: "http://3.88.210.55:1337",
+  baseURL: "https://back.somosyby.com",
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
