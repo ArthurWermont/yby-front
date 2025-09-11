@@ -137,7 +137,6 @@ const getClientsByCNPJs = async (cnpjs: string[]) => {
       }, "")
       .slice(0, -1);
     const response = await api.get(`/clients?${query}`);
-    console.log("Response:", response);
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar os clientes:", error);

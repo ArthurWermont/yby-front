@@ -49,10 +49,10 @@ export default function Reports() {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { user: currentUser } = useContext(AuthContext);
-
+  
   const isClient = !!currentUser?.client_id;
 
-  const formatCollection = (data: any) => {
+  const formatCollection = (data: any[]) => {
     const formattedData = data.map((collection: any) => {
       const wastes =
         collection?.wastes.map((item: any) => item.name).join(", ") || "";

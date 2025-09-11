@@ -176,7 +176,6 @@ export default function ClientForm({
 
   useEffect(() => {
     getClients().then((res) => {
-      console.log("res", res);
       const data = res.data.map((client: any) => {
         return {
           value: client.cnpj,
