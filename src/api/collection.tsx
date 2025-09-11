@@ -64,20 +64,25 @@ const getCollection = async () => {
     const data = responses.map((response) => response.data);
     const joinData = data.flatMap((item) => item.data);
 
-    console.log(joinData, data);
-
-    return joinData;
+    return formatCollectionData(joinData);
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);
-    return null;
+    return [];
   }
 };
 
 const getCollectionByDate = async (startDate: Date, endDate: Date) => {
   try {
     // Get first page to check total pages
-    const firstResponse = await api.get(
-      `/collections?filters[$and][0][createdAt][$gte]=${startDate.toISOString()}&filters[$and][1][createdAt][$lte]=${endDate.toISOString()}&populate=*&pagination[page]=1&pagination[pageSize]=100`
+   const firstResponse = await api.get(
+    `/collections?` +
+    `filters[$or][0][collection_date][$notNull]=true&` +
+    `filters[$or][0][collection_date][$gte]=${startDate.toISOString()}&` +
+    `filters[$or][0][collection_date][$lte]=${endDate.toISOString()}&` +
+    `filters[$or][1][collection_date][$null]=true&` +
+    `filters[$or][1][createdAt][$gte]=${startDate.toISOString()}&` +
+    `filters[$or][1][createdAt][$lte]=${endDate.toISOString()}&` +
+    `populate=*&pagination[page]=1&pagination[pageSize]=100`
     );
 
     const totalPages = firstResponse.data.meta.pagination.pageCount;
@@ -87,7 +92,14 @@ const getCollectionByDate = async (startDate: Date, endDate: Date) => {
     for (let page = 1; page <= totalPages; page++) {
       requests.push(
         api.get(
-          `/collections?filters[$and][0][createdAt][$gte]=${startDate.toISOString()}&filters[$and][1][createdAt][$lte]=${endDate.toISOString()}&populate=*&pagination[page]=${page}&pagination[pageSize]=100`
+          `/collections?` +
+          `filters[$or][0][collection_date][$notNull]=true&` +
+          `filters[$or][0][collection_date][$gte]=${startDate.toISOString()}&` +
+          `filters[$or][0][collection_date][$lte]=${endDate.toISOString()}&` +
+          `filters[$or][1][collection_date][$null]=true&` +
+          `filters[$or][1][createdAt][$gte]=${startDate.toISOString()}&` +
+          `filters[$or][1][createdAt][$lte]=${endDate.toISOString()}&` +
+          `populate=*&pagination[page]=${page}&pagination[pageSize]=100`
         )
       );
     }
@@ -98,8 +110,8 @@ const getCollectionByDate = async (startDate: Date, endDate: Date) => {
     // Combine data from all pages
     const data = responses.map((response) => response.data);
     const joinData = data.flatMap((item) => item.data);
-
-    return { data: joinData };
+    
+    return { data: formatCollectionData(joinData) };
   } catch (error) {
     console.error("Erro ao buscar as coletas deste mês:", error);
     return null;
@@ -110,7 +122,7 @@ const getCollectionClient = async ({
   documentId,
 }: {
   documentId: string | undefined;
-}) => {
+}): Promise<{ data: any[] }> => {
   try {
     const clienteResponse = await api.get(`/clients/${documentId}`);
     const clients = clienteResponse.data.data.clients;
@@ -125,10 +137,10 @@ const getCollectionClient = async ({
     const response = await api.get(
       `/collections?filters[$or][0][client][documentId][$eq]=${documentId}&populate=*&pagination[start]=0&pagination[limit]=100000&${query}`
     );
-    return response.data;
+    return { data: formatCollectionData(response.data.data) };
   } catch (error) {
     console.error("Erro ao buscar as coletas:", error);
-    return null;
+    return { data: []};
   }
 };
 
@@ -152,6 +164,15 @@ const deleteCollection = async (documentId: any) => {
     console.error("Erro ao deletar:", error);
     return null;
   }
+};
+
+const formatCollectionData = (data: any): any[] => {
+  return data.map((item: any) => {
+    return {
+      ...item,
+      createdAt: item.collection_date ? new Date(item.collection_date) : item.createdAt,
+    };
+  });
 };
 
 export {
