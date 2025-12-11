@@ -11,6 +11,9 @@ import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
 import Reports from "../reports";
+import ForgotPassword from "../login/forgot-password";
+import ResetPassword from "../login/reset-password";
+import DashClient from "../dashboard/dashboard-client";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -25,6 +28,8 @@ const MainRoutes = () => {
         <>
           <Route path="/signIn" element={<SignIn />} />
           <Route path="/signIn-client" element={<SignInClient />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Navigate to="/signIn" />} />
         </>
       )}
@@ -68,6 +73,7 @@ const MainRoutes = () => {
 
             {isClient && (
               <>
+                <Route path="/dashboard-client" element={<DashClient />} />
                 <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />
               </>

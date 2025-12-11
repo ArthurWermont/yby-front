@@ -85,6 +85,7 @@ const TableComponent = ({ collections }: any) => {
         { label: "PEV", key: "pev", width: 150 },
         { label: "Tipo de Resíduos", key: "waste", width: 200 },
         { label: "Coleta (Kg/L)", key: "weight", width: 150 },
+        { label: "Imagens", key: "image", width: 150 },
       ];
 
   if (rows.length === 0) {
@@ -148,6 +149,15 @@ const TableComponent = ({ collections }: any) => {
                     );
                   }
 
+                  if (column.key === "image" && !isAdmin) {
+                    return(
+                      <TableCell key={column.key}>
+                      <IconButton onClick={() => handleViewImage(row)}>
+                          <ImageIcon style={{ color: "#9B9794" }} />
+                        </IconButton>
+                      </TableCell>
+                    );
+                  }
                   return (
                     <TableCell key={column.key}>{row[column.key]}</TableCell>
                   );

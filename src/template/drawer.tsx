@@ -24,6 +24,8 @@ import { Outlet, useNavigate } from "react-router-dom";
 import EventIcon from "@mui/icons-material/Event";
 import FolderIcon from "@mui/icons-material/Folder";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+// import AssessmentIcon from "@mui/icons-material/Assessment";
 
 import EditIcon from "@mui/icons-material/Edit";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -137,7 +139,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
 
         <ListItemButton onClick={() => navigate("/dashboard")}>
           <ListItemIcon>
-            <FolderIcon />
+            <AnalyticsIcon />
           </ListItemIcon>
           <ListItemText
             style={{ color: "black", fontWeight: "bold" }}
@@ -180,6 +182,16 @@ export default function ResponsiveDrawerLayout(props: Props) {
           <ListItemText
             style={{ color: "black", fontWeight: "bold" }}
             primary="Relatórios"
+          />
+        </ListItemButton>
+
+         <ListItemButton onClick={() => navigate("/dashboard-client")}>
+          <ListItemIcon>
+            <AnalyticsIcon />
+          </ListItemIcon>
+          <ListItemText
+            style={{ color: "black", fontWeight: "bold" }}
+            primary="Dashboard"
           />
         </ListItemButton>
       </>
