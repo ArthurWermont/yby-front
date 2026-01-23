@@ -7,13 +7,12 @@ import { useContext } from "react";
 import { AuthContext } from "../context/auth-context";
 import Dashboard from "../dashboard";
 import Edit from "../edit";
+import ForgotPassword from "../login/forgot-password";
+import ResetPassword from "../login/reset-password";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
 import Reports from "../reports";
-import ForgotPassword from "../login/forgot-password";
-import ResetPassword from "../login/reset-password";
-import DashClient from "../dashboard/dashboard-client";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -44,7 +43,7 @@ const MainRoutes = () => {
                   path="/cadastro"
                   element={<Navigate to="/cadastro/cliente" />}
                 />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard mode="admin" />} />
                 <Route
                   path="/cadastro/cliente"
                   element={<Register type="cliente" />}
@@ -73,7 +72,10 @@ const MainRoutes = () => {
 
             {isClient && (
               <>
-                <Route path="/dashboard-client" element={<DashClient />} />
+                <Route
+                  path="/dashboard-client"
+                  element={<Dashboard mode="client" />}
+                />
                 <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />
               </>

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
-  // Image
+  Image,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 
@@ -24,17 +24,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   logo: {
-     width: 90, 
-     height: 90, 
-     marginBottom: 8
+    width: 90,
+    height: 90,
+    marginBottom: 8,
   },
   section: {
+    marginTop: 10,
     marginBottom: 10,
   },
   title: {
-    fontSize: 22, 
-    fontWeight: "bold", 
-    textAlign: "center"
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   text: {
     fontSize: 12,
@@ -98,12 +99,9 @@ const MyDocument = ({ rows }: any) => {
   return (
     <Document>
       <Page style={styles.page}>
-
         <View style={{ alignItems: "center", marginBottom: 25 }}>
-          {/* <Image src="/ybyBlack.png" style={styles.logo} /> */}
-          <Text style={styles.title}>
-            Relatório de Coleta de Resíduos
-          </Text>
+          <Image src="/ybyBlack.png" style={styles.logo} />{" "}
+          <Text style={styles.title}>Relatório de Coleta de Resíduos</Text>
           <Text style={{ fontSize: 11, textAlign: "center", color: "#444" }}>
             Dados consolidados das coletas realizadas
           </Text>

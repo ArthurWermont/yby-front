@@ -1,6 +1,10 @@
+import moment from "moment";
+import 'moment/locale/pt-br';
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/auth-context";
 import MainRoutes from "./routes";
+
+moment.locale("pt-br");
 
 // Function to verify and clear localStorage daily
 const clearLocalStorageDaily = () => {

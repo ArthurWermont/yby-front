@@ -337,6 +337,7 @@ export default function CollectionForm({
                     <MenuItem value={"3"}>Metal</MenuItem>
                     <MenuItem value={"4"}>Vidro</MenuItem>
                     <MenuItem value={"6"}>Orgânicos</MenuItem>
+                    <MenuItem value={"7"}>Óleo</MenuItem>
                     <MenuItem value={"5"}>Reciclaveis Geral</MenuItem>
                   </Select>
                   {fieldState.error && (

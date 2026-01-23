@@ -81,6 +81,27 @@ export default function Reports() {
 
     return OrderByDate;
   };
+  
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  // const { startDate, endDate } = useDashboardContext();
+
+  // const startDateObj = moment(startDate, "YYYY-MM-DD").toDate();
+  // const endDateObj = moment(endDate, "YYYY-MM-DD").toDate();
+
+  // const [start, setStart] = useState<Date>(startDateObj);
+  // const [end, setEnd] = useState<Date>(endDateObj);
+
+  // const getCollectionByDateStartAndEnd = async () => {
+  //   try {
+  //     const response = await getCollectionByDate(startDateObj, endDateObj);
+  //     setFilteredCollections(response);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  ////////////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
     if (isClient) {
