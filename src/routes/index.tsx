@@ -1,18 +1,18 @@
+import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import CollectionPoint from "../collection-point/collection-point";
-import SignIn from "../login/signIn-admin";
-import ResponsiveDrawerLayout from "../template/drawer";
-
-import { useContext } from "react";
 import { AuthContext } from "../context/auth-context";
 import Dashboard from "../dashboard";
 import Edit from "../edit";
 import ForgotPassword from "../login/forgot-password";
 import ResetPassword from "../login/reset-password";
+import SignIn from "../login/signIn-admin";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
-import Reports from "../reports";
+import Reports from "../reports_";
+import { ReportsProvider } from "../reports_/context";
+import ResponsiveDrawerLayout from "../template/drawer";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -37,6 +37,18 @@ const MainRoutes = () => {
       <Route element={<ResponsiveDrawerLayout />}>
         {currentUser && (
           <>
+            <Route
+              path="/relatorios"
+              element={
+                <>
+                  {/* <Reports /> */}
+                  <ReportsProvider>
+                    <Reports />
+                  </ReportsProvider>
+                </>
+              }
+            />
+
             {isAdmin && (
               <>
                 <Route
@@ -58,7 +70,6 @@ const MainRoutes = () => {
                 />
                 <Route path="/edit/client" element={<Edit type="cliente" />} />
                 <Route path="/planejamento" element={<PlanningList />} />
-                <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />
               </>
             )}
@@ -76,7 +87,6 @@ const MainRoutes = () => {
                   path="/dashboard-client"
                   element={<Dashboard mode="client" />}
                 />
-                <Route path="/relatorios" element={<Reports />} />
                 <Route path="*" element={<Navigate to="/relatorios" />} />
               </>
             )}

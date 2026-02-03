@@ -1,5 +1,9 @@
 import { ExpandLess, ExpandMore, Place } from "@mui/icons-material";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
+import EventIcon from "@mui/icons-material/Event";
+import FolderIcon from "@mui/icons-material/Folder";
 import MenuIcon from "@mui/icons-material/Menu";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import {
   Button,
   Collapse,
@@ -11,24 +15,17 @@ import {
   useTheme,
 } from "@mui/material";
 import Box from "@mui/material/Box";
-
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-
 import * as React from "react";
 import { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-
-import EventIcon from "@mui/icons-material/Event";
-import FolderIcon from "@mui/icons-material/Folder";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
 // import AssessmentIcon from "@mui/icons-material/Assessment";
-
 import EditIcon from "@mui/icons-material/Edit";
 import LogoutIcon from "@mui/icons-material/Logout";
+import ybyPng from "../assets/ybyBlack.png";
 import { AuthContext } from "../context/auth-context";
 
 const drawerWidth = 240;
@@ -83,8 +80,6 @@ export default function ResponsiveDrawerLayout(props: Props) {
     logout();
     navigate("/signIn");
   };
-
-  const ybyPng = require("../assets/ybyBlack.png");
 
   const AdminMenu = () => {
     return (
@@ -185,7 +180,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
           />
         </ListItemButton>
 
-         <ListItemButton onClick={() => navigate("/dashboard-client")}>
+        <ListItemButton onClick={() => navigate("/dashboard-client")}>
           <ListItemIcon>
             <AnalyticsIcon />
           </ListItemIcon>
