@@ -75,7 +75,7 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
   }, [search, lastSearch]);
 
   return (
-    <Paper style={{ height: 400, width: "100%" }}>
+    <Paper style={{ height: 400, width: "100%", marginTop: 30 }}>
       <TableVirtuoso
         ref={virtuosoRef}
         totalCount={data.length}

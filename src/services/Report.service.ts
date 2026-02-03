@@ -1,6 +1,6 @@
 import qs from "qs";
 import type { IContext } from "../reports_/context";
-import { BaseService } from "./base.service";
+import { BaseService } from "./Base.service";
 
 interface ReportParams {
   documentId?: string;
@@ -101,6 +101,16 @@ class ReportService extends BaseService {
         createdAt: {
           $gte: search.startDate,
           $lte: search.endDate,
+        },
+      });
+    }
+
+    if (search.waste) {
+      (filters.$and ||= []).push({
+        wastes: {
+          name: {
+            $contains: search.waste,
+          },
         },
       });
     }

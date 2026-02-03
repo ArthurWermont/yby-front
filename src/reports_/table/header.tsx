@@ -10,7 +10,7 @@ export const Header = () => {
           variant="head"
           align={column.numeric || false ? "right" : "left"}
           style={{ width: column.width }}
-          sx={{ backgroundColor: "background.paper" }}
+          sx={{ backgroundColor: "#F9F5ED", }}
         >
           {column.label}
         </TableCell>

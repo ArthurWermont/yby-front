@@ -86,7 +86,7 @@ const LineGraphEnergy: FC<LineGraphProps> = (props) => {
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => `${value}`} />
+              <YAxis tickFormatter={(value) => `${value}`} width={80} />
               <Tooltip formatter={(value: number) => `${value} MWh`} />
               <Bar
                 dataKey="mwh"

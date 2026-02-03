@@ -24,6 +24,8 @@ export const Styles = styled.div`
 
   #exports {
     display: flex;
+    align-items: center;
     gap: 16px;
+    margin-top: 12px;
   }
 `;

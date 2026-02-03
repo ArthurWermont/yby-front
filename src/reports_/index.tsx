@@ -1,6 +1,7 @@
+import { format } from "date-fns";
 import { useContext } from "react";
 import { AuthContext } from "../context/auth-context";
-import { reportService } from "../services/report.service";
+import { reportService } from "../services/Report.service";
 import { useReportsContext } from "./context";
 import { Header } from "./header";
 import { Styles } from "./styles";
@@ -50,7 +51,7 @@ const Report = () => {
         imageColectorUrl: collection.colector?.url || "",
         hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
 
-        createdAt: collection?.createdAt || "",
+        createdAt: format(collection?.createdAt, "dd/MM/yyyy | HH:mm") || "",
 
         actions: <></>,
       } as TableData;

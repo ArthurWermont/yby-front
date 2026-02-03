@@ -100,10 +100,7 @@ const LineGraph: FC<LineGraphProps> = (props) => {
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
-              <YAxis
-                // domain={[10, 12]}
-                tickFormatter={(value) => `${value}kg`}
-              />
+              <YAxis tickFormatter={(value) => `${value}kg`} width={80} />
               <Tooltip formatter={(value: number) => `${value} kg`} />
               <Line
                 type="linear"

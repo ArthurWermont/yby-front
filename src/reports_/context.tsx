@@ -12,6 +12,7 @@ export interface IContext {
     pev: string;
     startDate: string;
     endDate: string;
+    waste:string
     sortByDate: "asc" | "desc";
   };
 
@@ -36,6 +37,7 @@ export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     sortByDate: "desc",
     startDate: "",
     endDate: "",
+    waste:""
   });
 
   const [lastSearch, setLastSearch] = useState<string | null>(null);

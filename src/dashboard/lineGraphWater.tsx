@@ -86,7 +86,7 @@ const LineGraphWater: FC<LineGraphProps> = (props) => {
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => `${value}L`} />
+              <YAxis tickFormatter={(value) => `${value}L`} width={80} />
               <Tooltip formatter={(value: number) => `${value} L`} />
               <Line
                 type="linear"
