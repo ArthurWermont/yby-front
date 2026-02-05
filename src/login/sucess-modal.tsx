@@ -1,9 +1,9 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, useTheme } from "@mui/material"; // Importações aprimoradas
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import Typography from "@mui/material/Typography";
 
 // 1. Definição das Props (Tipagem Profissional)
 interface SuccessModalProps {
@@ -51,7 +51,7 @@ export default function SuccessModal({ open, onNavigate }: SuccessModalProps) {
             id="success-dialog-title"
             gutterBottom // Adiciona margem inferior padrão
           >
-            Recuperação Enviada!
+            Recuperação Solicitada!
           </Typography>
 
           {/* Mensagem Principal */}
@@ -60,7 +60,7 @@ export default function SuccessModal({ open, onNavigate }: SuccessModalProps) {
             color="text.secondary"
             sx={{ mt: theme.spacing(1), mb: theme.spacing(3) }}
           >
-            {"Enviamos um link de recuperação para seu e-mail!"}
+            {"Se esse e-mail estiver cadastrado, você receberá um link para redefinir sua senha."}
           </Typography>
 
           {/* Botão de Ação */}

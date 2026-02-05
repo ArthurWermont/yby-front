@@ -1,24 +1,24 @@
-import { FC, memo, useEffect, useState } from "react";
-import { LineGraphProps } from "./lineGraph";
-import {
-  EnergyDataType,
-  getCollectionsByMonthEnergy,
-} from "../api/dashboard/byMonthEnergy";
-import moment from "moment";
 import { Paper, Typography } from "@mui/material";
+import moment from "moment";
+import { type FC, memo, useEffect, useState } from "react";
 import {
-  ResponsiveContainer,
+  Bar,
   BarChart,
   CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Bar,
 } from "recharts";
+import {
+  type EnergyDataType,
+  getCollectionsByMonthEnergy,
+} from "../api/dashboard/byMonthEnergy";
 import Loading from "./components/loading";
 import { useDashboardContext } from "./context";
+import { type LineGraphProps } from "./lineGraph";
 
-const LineGraphEnergy: FC<LineGraphProps> = (props) => {
+const LineGraphEnergy: FC<LineGraphProps> = () => {
   const {
     startDate,
     endDate,
@@ -87,7 +87,9 @@ const LineGraphEnergy: FC<LineGraphProps> = (props) => {
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
               <YAxis tickFormatter={(value) => `${value}`} width={80} />
-              <Tooltip formatter={(value: number) => `${value} MWh`} />
+              <Tooltip
+                formatter={(value: number | undefined) => `${value} MWh`}
+              />
               <Bar
                 dataKey="mwh"
                 fill="#F1592A"

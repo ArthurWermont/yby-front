@@ -1,26 +1,26 @@
 import { Paper, Typography } from "@mui/material";
-import { FC, memo, useEffect, useState } from "react";
+import moment from "moment";
+import { type FC, memo, useEffect, useState } from "react";
 import {
-  ResponsiveContainer,
-  LineChart,
   CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Line,
 } from "recharts";
 import {
-  WeightDataType,
+  type WeightDataType,
   getCollectionsByMonth,
   getDashboardSummary,
 } from "../api/dashboard";
 import Loading from "./components/loading";
-import moment from "moment";
 import { useDashboardContext } from "./context";
 
 export interface LineGraphProps {}
 
-const LineGraph: FC<LineGraphProps> = (props) => {
+const LineGraph: FC<LineGraphProps> = () => {
   const {
     startDate,
     endDate,
@@ -101,7 +101,9 @@ const LineGraph: FC<LineGraphProps> = (props) => {
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
               <YAxis tickFormatter={(value) => `${value}kg`} width={80} />
-              <Tooltip formatter={(value: number) => `${value} kg`} />
+              <Tooltip
+                formatter={(value: number | undefined) => `${value} kg`}
+              />
               <Line
                 type="linear"
                 dataKey="totalWeight"

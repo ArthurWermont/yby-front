@@ -1,6 +1,6 @@
 import { Paper, Typography } from "@mui/material";
 import moment from "moment";
-import { FC, memo, useEffect, useState } from "react";
+import { type FC, memo, useEffect, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -12,13 +12,13 @@ import {
 } from "recharts";
 import {
   getCollectionsByMonthWater,
-  WaterDataType,
+  type WaterDataType,
 } from "../api/dashboard/byMonthWater";
 import Loading from "./components/loading";
 import { useDashboardContext } from "./context";
-import { LineGraphProps } from "./lineGraph";
+import { type LineGraphProps } from "./lineGraph";
 
-const LineGraphWater: FC<LineGraphProps> = (props) => {
+const LineGraphWater: FC<LineGraphProps> = () => {
   const {
     startDate,
     endDate,
@@ -87,7 +87,9 @@ const LineGraphWater: FC<LineGraphProps> = (props) => {
               <CartesianGrid strokeDasharray="4 4" vertical={false} />
               <XAxis dataKey="month" />
               <YAxis tickFormatter={(value) => `${value}L`} width={80} />
-              <Tooltip formatter={(value: number) => `${value} L`} />
+              <Tooltip
+                formatter={(value: number | undefined) => `${value} L`}
+              />
               <Line
                 type="linear"
                 dataKey="totalLitros"

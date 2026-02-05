@@ -1,9 +1,12 @@
 import { format } from "date-fns";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/auth-context";
 import { reportService } from "../services/Report.service";
 import { useReportsContext } from "./context";
 import { Header } from "./header";
+import ModalDeleteComponent from "./modals/modal-delete";
+import ModalFormComponent from "./modals/modal-form";
+import ModalComponent from "./modals/modal-image";
 import { Styles } from "./styles";
 import { ReportTable } from "./table";
 import { TableActions } from "./table/actions";
@@ -13,6 +16,26 @@ const Report = () => {
   const { search } = useReportsContext();
   const { user: currentUser } = useContext(AuthContext);
   const isClient = !!currentUser?.client_id;
+
+  const [selectedRow, setSelectedRow] = useState<TableData | null>(null);
+  const [openModalEdit, setOpenModalEdit] = useState(false);
+  const [openModalImage, setOpenModalImage] = useState(false);
+  const [openModalDelete, setOpenModalDelete] = useState(false);
+
+  const openForm = (row: TableData) => {
+    setOpenModalEdit(true);
+    setSelectedRow(row);
+  };
+
+  const openDelete = (row: TableData) => {
+    setOpenModalDelete(true);
+    setSelectedRow(row);
+  };
+
+  const openImage = (row: TableData) => {
+    setOpenModalImage(true);
+    setSelectedRow(row);
+  };
 
   const fetchData = async ({ page }: { page: number }) => {
     const { data: reportData, meta } = await reportService.getData({
@@ -56,7 +79,13 @@ const Report = () => {
       } as TableData;
 
       formattedCollection.actions = (
-        <TableActions rowData={formattedCollection} />
+        <TableActions
+          rowData={formattedCollection}
+          onEdit={openForm}
+          onDelete={openDelete}
+          onViewImage={openImage}
+          isClient={isClient}
+        />
       );
 
       return formattedCollection;
@@ -64,12 +93,43 @@ const Report = () => {
   };
 
   return (
-    <Styles>
-      <Header />
-      <ReportTable fetchData={fetchData} />
+    <>
+      {openModalImage && (
+        <ModalComponent
+          open={openModalImage}
+          handleClose={() => setOpenModalImage(false)}
+          images={
+            selectedRow
+              ? {
+                  imageColector: selectedRow.imageColectorUrl,
+                  imageAvaria: selectedRow.imageAvaria,
+                }
+              : undefined
+          }
+        />
+      )}
 
-      {/* modal */}
-    </Styles>
+      {openModalEdit && (
+        <ModalFormComponent
+          open={openModalEdit}
+          handleClose={() => setOpenModalEdit(false)}
+          data={selectedRow}
+        />
+      )}
+
+      {openModalDelete && (
+        <ModalDeleteComponent
+          open={openModalDelete}
+          handleClose={() => setOpenModalDelete(false)}
+          documentId={selectedRow?.documentId}
+        />
+      )}
+
+      <Styles>
+        <Header />
+        <ReportTable fetchData={fetchData} />
+      </Styles>
+    </>
   );
 };
 
