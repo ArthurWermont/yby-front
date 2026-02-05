@@ -6,6 +6,7 @@ import { useReportsContext } from "./context";
 import { Header } from "./header";
 import { Styles } from "./styles";
 import { ReportTable } from "./table";
+import { TableActions } from "./table/actions";
 import type { TableData } from "./table/interfaces";
 
 const Report = () => {
@@ -34,7 +35,7 @@ const Report = () => {
         collection?.wastes.map((item: any) => item.name).join(", ") || "";
       const wastesIds = collection?.wastes.map((item: any) => item.id);
 
-      return {
+      const formattedCollection: TableData = {
         id: collection.id || "",
         documentId: collection.documentId,
 
@@ -52,9 +53,13 @@ const Report = () => {
         hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
 
         createdAt: format(collection?.createdAt, "dd/MM/yyyy | HH:mm") || "",
-
-        actions: <></>,
       } as TableData;
+
+      formattedCollection.actions = (
+        <TableActions rowData={formattedCollection} />
+      );
+
+      return formattedCollection;
     });
   };
 
@@ -62,6 +67,8 @@ const Report = () => {
     <Styles>
       <Header />
       <ReportTable fetchData={fetchData} />
+
+      {/* modal */}
     </Styles>
   );
 };
