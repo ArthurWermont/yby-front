@@ -1,5 +1,10 @@
 import { Button } from "@mui/material";
 import { styled } from "@mui/system";
+import { Link } from "react-router-dom";
+import { useReportsContext } from "../context";
+import qs from "qs";
+import { useContext } from "react";
+import { AuthContext } from "../../context/auth-context";
 
 const StyledButton = styled(Button)({
   backgroundColor: "#15853B",
@@ -11,11 +16,32 @@ const StyledButton = styled(Button)({
 });
 
 export const Exports = () => {
+  const {
+    search: { startDate, endDate, pev, waste },
+  } = useReportsContext();
+  const { user: currentUser } = useContext(AuthContext);
+  const isClient = !!currentUser?.client_id;
+
+  const query = qs.stringify({
+    doc: currentUser?.client_id,
+    end: endDate,
+    start: startDate,
+    client: isClient,
+    pev,
+    waste,
+  });
   return (
     <div id="exports">
       {/* <GeneratePDF collections={filteredCollections} />
         <GenerateExcel collections={filteredCollections} /> */}
-      <StyledButton>Exportar para PDF</StyledButton>
+      <Link
+        to={{ pathname: "/relatorios/pdf", search: `?${query}` }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <StyledButton>Exportar para PDF</StyledButton>
+      </Link>
+
       <StyledButton>Exportar para Excel</StyledButton>
     </div>
   );

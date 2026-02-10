@@ -13,6 +13,7 @@ import Register from "../register";
 import Reports from "../reports_";
 import { ReportsProvider } from "../reports_/context";
 import ResponsiveDrawerLayout from "../template/drawer";
+import GeneratePDF from "../reports_/exports/pdf";
 
 const MainRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
@@ -32,7 +33,7 @@ const MainRoutes = () => {
           <Route path="/" element={<Navigate to="/signIn" />} />
         </>
       )}
-
+      <Route path="/relatorios/pdf" element={<GeneratePDF />} />
       {/* Protected Routes */}
       <Route element={<ResponsiveDrawerLayout />}>
         {currentUser && (
@@ -48,7 +49,6 @@ const MainRoutes = () => {
                 </>
               }
             />
-
             {isAdmin && (
               <>
                 <Route
