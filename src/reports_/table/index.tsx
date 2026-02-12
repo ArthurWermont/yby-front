@@ -1,9 +1,9 @@
-import { Paper } from "@mui/material";
 import { useCallback, useEffect, useRef, type FC } from "react";
 import { TableVirtuoso } from "react-virtuoso";
 import { useImmer } from "use-immer";
 import { useReportsContext } from "../context";
 import { rowContent, virtuosoTableComponents } from "./config";
+import { Footer } from "./footer";
 import { Header } from "./header";
 import type { FetchDataResult, TableData } from "./interfaces";
 
@@ -21,10 +21,15 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
     page: 1,
   });
 
+  const stateRef = useRef({ data, loading, hasMore, page });
+  stateRef.current = { data, loading, hasMore, page };
+
   const virtuosoRef = useRef(null);
 
-  const fetchData = async (pageNumber: number, force = false) => {
-    if (!force && (loading || !hasMore)) return;
+  const fetchData = useCallback(async (pageNumber: number) => {
+    const currentState = stateRef.current;
+
+    if (currentState.loading || !currentState.hasMore) return;
 
     setState((draft) => {
       draft.loading = true;
@@ -42,50 +47,48 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
       }
 
       draft.hasMore = draft.data.length < pagination.total;
-
+      draft.page = pageNumber;
       draft.loading = false;
     });
-  };
+  }, []);
 
   const loadMore = useCallback(async () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setState((draft) => {
-        draft.page = nextPage;
-      });
-      await fetchData(nextPage);
+    const currentState = stateRef.current;
+
+    if (!currentState.loading && currentState.hasMore) {
+      const nextPage = currentState.page + 1;
+      fetchData(nextPage);
     }
-  }, [loading, hasMore, page, fetchData]);
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData(1);
   }, []);
 
   useEffect(() => {
-    if (!lastSearch) return;
-
     setState((draft) => {
-      draft.page = 1;
-      draft.hasMore = true;
-      draft.loading = false;
       draft.data = [];
+      draft.loading = false;
+      draft.hasMore = true;
+      draft.page = 1;
     });
 
-    fetchData(1, true);
-  }, [search, lastSearch]);
+    fetchData(1);
+  }, [search]);
 
   return (
-    <Paper style={{ height: 400, width: "100%", marginTop: 30 }}>
-      <TableVirtuoso
-        ref={virtuosoRef}
-        totalCount={data.length}
-        data={data}
-        fixedHeaderContent={Header}
-        components={virtuosoTableComponents}
-        itemContent={rowContent}
-        endReached={loadMore}
-        overscan={10}
-      />
-    </Paper>
+    <TableVirtuoso
+      ref={virtuosoRef}
+      totalCount={data.length}
+      data={data}
+      components={virtuosoTableComponents}
+      itemContent={rowContent}
+      endReached={loadMore}
+      overscan={10}
+      fixedHeaderContent={Header}
+      fixedFooterContent={() => (
+        <Footer data={data} loading={loading} hasMore={hasMore} />
+      )}
+    />
   );
 };

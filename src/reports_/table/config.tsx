@@ -61,6 +61,7 @@ export const virtuosoTableComponents: TableComponents<TableData> = {
   Table: (props) => (
     <Table
       {...props}
+      style={{ height: "100%" }}
       sx={{ borderCollapse: "separate", tableLayout: "fixed" }}
     />
   ),

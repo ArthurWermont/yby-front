@@ -1,4 +1,3 @@
-import moment from "moment";
 import {
   createContext,
   useContext,
@@ -12,11 +11,9 @@ export interface IContext {
     pev: string;
     startDate: string;
     endDate: string;
-    waste:string
+    waste: string;
     sortByDate: "asc" | "desc";
   };
-
-  lastSearch: string | null;
 
   onSearchChange?: (search: IContext["search"]) => void;
 }
@@ -37,13 +34,10 @@ export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     sortByDate: "desc",
     startDate: "",
     endDate: "",
-    waste:""
+    waste: "",
   });
 
-  const [lastSearch, setLastSearch] = useState<string | null>(null);
-
   const handleSearchChange = (newSearch: IContext["search"]) => {
-    setLastSearch(moment().toISOString());
     setSearch(newSearch);
   };
 
@@ -51,7 +45,6 @@ export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     <Context.Provider
       value={{
         search,
-        lastSearch,
         onSearchChange: handleSearchChange,
       }}
     >
