@@ -2,17 +2,17 @@ import { Button } from "@mui/material";
 import { styled } from "@mui/system";
 import {
   Document,
+  Image,
   Page,
-  PDFDownloadLink,
+  PDFViewer,
   StyleSheet,
   Text,
-  View,
-  Image,
-  PDFViewer,
+  View
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
 import { reportService } from "../../services/Report.service";
 
 // Estilos do PDF
@@ -169,7 +169,6 @@ const MyDocument = ({ rows }: any) => {
 const GeneratePDF = () => {
   const [params] = useSearchParams();
   const [rows, setRows] = useState<any[]>([]);
-  console.log([...params])
 
   const fetchAll = async (page = 1, limit = 500, items = []) => {
     try {
@@ -226,45 +225,31 @@ const GeneratePDF = () => {
       } catch (error) {}
     })();
   }, []);
+
   if (rows.length === 0) {
     return "carregando";
   }
-  return (
-    <PDFViewer
-      style={StyleSheet.create({
-        viewer: {
-          width: "100%",
-          height: "600px",
-        },
-        page: {
-          padding: 30,
-        },
-        title: {
-          fontSize: 24,
-          marginBottom: 20,
-        },
-        text: {
-          fontSize: 12,
-          marginBottom: 10,
-        },
-      })}
-    >
-      <MyDocument rows={rows} />
-    </PDFViewer>
-  );
 
   return (
-    <PDFDownloadLink
-      document={<MyDocument rows={rows} />}
-      fileName="relatorio_de_coleta.pdf"
-    >
-      {({ loading }) => (
-        <StyledButton>
-          {loading ? "Carregando..." : "Exportar para PDF"}
-        </StyledButton>
-      )}
-    </PDFDownloadLink>
+    <>
+      <GlobalStyles />
+      <PDFViewer>
+        <MyDocument rows={rows} />
+      </PDFViewer>
+    </>
   );
 };
+
+const GlobalStyles = createGlobalStyle`
+  #root{
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    >iframe{
+    height:100%;
+    width:100%;
+    }
+  }
+`;
 
 export default GeneratePDF;

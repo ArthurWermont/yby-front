@@ -1,6 +1,8 @@
+import moment from "moment";
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type FC,
   type PropsWithChildren,
@@ -32,14 +34,21 @@ export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const [search, setSearch] = useState<IContext["search"]>({
     pev: "",
     sortByDate: "desc",
-    startDate: "",
-    endDate: "",
+    startDate: moment().subtract(6, "months").format("YYYY-MM-DD"),
+    endDate: moment().format("YYYY-MM-DD"),
     waste: "",
   });
 
   const handleSearchChange = (newSearch: IContext["search"]) => {
     setSearch(newSearch);
   };
+
+  useEffect(() => {
+    console.log("montei");
+    return () => {
+      console.log("desmontei")
+    };
+  }, []);
 
   return (
     <Context.Provider

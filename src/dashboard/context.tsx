@@ -1,12 +1,12 @@
 import moment from "moment";
 import {
   createContext,
-  FC,
+  type FC,
   useContext,
-  PropsWithChildren,
+  type PropsWithChildren,
   useState,
 } from "react";
-import {
+import type {
   WeightDataType,
   WaterDataType,
   EnergyDataType,

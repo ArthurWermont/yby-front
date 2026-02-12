@@ -8,15 +8,14 @@ import { type IContext, useReportsContext } from "../context";
 export const Filters = () => {
   const { user: currentUser } = useContext(AuthContext);
   const isClient = !!currentUser?.client_id;
+  const { search, onSearchChange } = useReportsContext();
   const [fields, setFields] = useImmer<IContext["search"]>({
     pev: "",
-    startDate: "",
-    endDate: "",
+    startDate:search.startDate,
+    endDate:search.endDate,
     sortByDate: "desc",
     waste: "",
   });
-
-  const { search, onSearchChange } = useReportsContext();
 
   const handleFilter = () => {
     const hasDiff = Object.keys(fields).some((key) => {

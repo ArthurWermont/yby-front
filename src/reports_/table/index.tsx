@@ -12,7 +12,7 @@ interface ReportTableProps {
 }
 
 export const ReportTable: FC<ReportTableProps> = (props) => {
-  const { search, lastSearch } = useReportsContext();
+  const { search } = useReportsContext();
 
   const [{ data, loading, hasMore, page }, setState] = useImmer({
     data: [] as TableData[],
@@ -28,7 +28,7 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
 
   const fetchData = useCallback(async (pageNumber: number) => {
     const currentState = stateRef.current;
-
+    console.log(currentState);
     if (currentState.loading || !currentState.hasMore) return;
 
     setState((draft) => {
@@ -46,17 +46,21 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
         draft.data.push(...newData);
       }
 
-      draft.hasMore = draft.data.length < pagination.total;
-      draft.page = pageNumber;
+      draft.hasMore = draft.data.length < pagination.total && pagination.start < pagination.total;
       draft.loading = false;
     });
-  }, []);
+  }, [props.fetchData]);
 
   const loadMore = useCallback(async () => {
     const currentState = stateRef.current;
 
     if (!currentState.loading && currentState.hasMore) {
       const nextPage = currentState.page + 1;
+      console.log(currentState.page)
+      console.log(nextPage)
+      setState((draft) => {
+        draft.page = nextPage;
+      });
       fetchData(nextPage);
     }
   }, [fetchData]);
@@ -66,6 +70,13 @@ export const ReportTable: FC<ReportTableProps> = (props) => {
   }, []);
 
   useEffect(() => {
+    stateRef.current = {
+      data: [] as TableData[],
+      loading: false,
+      hasMore: true,
+      page: 1,
+    };
+    
     setState((draft) => {
       draft.data = [];
       draft.loading = false;

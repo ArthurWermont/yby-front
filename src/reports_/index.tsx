@@ -38,6 +38,7 @@ const Report = () => {
   };
 
   const fetchData = async ({ page }: { page: number }) => {
+    
     const { data: reportData, meta } = await reportService.getData({
       documentId: currentUser?.client_id,
       isAdmin: !isClient,
