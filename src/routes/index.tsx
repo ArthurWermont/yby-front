@@ -15,101 +15,61 @@ import { PrivateRoute } from "./privateRoute";
 
 export const Routes = () => {
   const routes = useRoutes([
-    // Admin routes
     {
-      path: "",
-      element: (
-        <PrivateRoute>
-          <AdminGuard />
-        </PrivateRoute>
-      ),
+      path: "/",
       children: [
-        {
-          path: "dashboard",
-          element: <Dashboard mode="admin" />,
-        },
-        {
-          path: "cadastro",
-          children: [
-            {
-              index: true,
-              path: "cliente",
-              element: <Register type="cliente" />,
-            },
-            {
-              path: "cooperativa",
-              element: <Register type="cooperativa" />,
-            },
-          ],
-        },
-        {
-          path: "edit/client",
-          element: <Edit type="cliente" />,
-        },
-        {
-          path: "planejamento",
-          element: <PlanningList />,
-        },
+        { path: "signIn", element: <SignIn /> },
+        { path: "signIn-client", element: <SignInClient /> },
+        { path: "forgot-password", element: <ForgotPassword /> },
+        { path: "reset-password", element: <ResetPassword /> },
       ],
     },
 
-    // Client routes
     {
-      path: "",
-      element: (
-        <PrivateRoute>
-          <ClientGuard />
-        </PrivateRoute>
-      ),
-      children: [
-        { path: "dashboard-client", element: <Dashboard mode="client" /> },
-      ],
-    },
-
-    // Cooperative routes
-    {
-      path: "",
-      element: (
-        <PrivateRoute>
-          <CooperativeGuard />
-        </PrivateRoute>
-      ),
-      children: [
-        {
-          path: "ponto-coleta",
-          element: <CollectionPoint />,
-        },
-        {
-          path: "*",
-          element: <Navigate to="/ponto-coleta" />,
-        },
-      ],
-    },
-
-    // Public routes
-    {
-      path: "signIn",
-      element: <SignIn />,
-    },
-    {
-      path: "signIn-client",
-      element: <SignInClient />,
-    },
-    {
-      path: "forgot-password",
-      element: <ForgotPassword />,
-    },
-
-    {
-      path: "reset-password",
-      element: <ResetPassword />,
-    },
-
-    // Catch routes
-    {
-      path: "",
+      path: "/",
       element: <PrivateRoute />,
       children: [
+        // Admin routes
+        {
+          element: <AdminGuard />,
+          children: [
+            { path: "dashboard", element: <Dashboard mode="admin" /> },
+            {
+              path: "cadastro",
+              children: [
+                {
+                  index: true,
+                  path: "cliente",
+                  element: <Register type="cliente" />,
+                },
+                {
+                  path: "cooperativa",
+                  element: <Register type="cooperativa" />,
+                },
+              ],
+            },
+            { path: "edit/client", element: <Edit type="cliente" /> },
+            { path: "planejamento", element: <PlanningList /> },
+          ],
+        },
+
+        // Client routes
+        {
+          element: <ClientGuard />,
+          children: [
+            { path: "dashboard-client", element: <Dashboard mode="client" /> },
+          ],
+        },
+
+        // Cooperative routes
+        {
+          element: <CooperativeGuard />,
+          children: [
+            { path: "ponto-coleta", element: <CollectionPoint /> },
+            { path: "*", element: <Navigate to="/ponto-coleta" /> },
+          ],
+        },
+
         {
           path: "*",
           element: <Navigate to="relatorios" />,
