@@ -1,7 +1,5 @@
-import { useContext } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, useRoutes } from "react-router-dom";
 import CollectionPoint from "../collection-point/collection-point";
-import { AuthContext } from "../context/auth-context";
 import Dashboard from "../dashboard";
 import Edit from "../edit";
 import ForgotPassword from "../login/forgot-password";
@@ -10,91 +8,115 @@ import SignIn from "../login/signIn-admin";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
-import Reports from "../reports_";
-import { ReportsProvider } from "../reports_/context";
-import ResponsiveDrawerLayout from "../template/drawer";
-import GeneratePDF from "../reports_/exports/pdf";
+import { AdminGuard } from "./adminGuard";
+import { ClientGuard } from "./clientGuard";
+import { CooperativeGuard } from "./cooperativeGuard";
+import { PrivateRoute } from "./privateRoute";
 
-const MainRoutes = () => {
-  const { user: currentUser } = useContext(AuthContext);
+export const Routes = () => {
+  const routes = useRoutes([
+    // Admin routes
+    {
+      path: "",
+      element: (
+        <PrivateRoute>
+          <AdminGuard />
+        </PrivateRoute>
+      ),
+      children: [
+        {
+          path: "dashboard",
+          element: <Dashboard mode="admin" />,
+        },
+        {
+          path: "cadastro",
+          children: [
+            {
+              index: true,
+              path: "cliente",
+              element: <Register type="cliente" />,
+            },
+            {
+              path: "cooperativa",
+              element: <Register type="cooperativa" />,
+            },
+          ],
+        },
+        {
+          path: "edit/client",
+          element: <Edit type="cliente" />,
+        },
+        {
+          path: "planejamento",
+          element: <PlanningList />,
+        },
+      ],
+    },
 
-  const isClient = !!currentUser?.client_id;
-  const isCooperative = !!currentUser?.cooperative_id;
-  const isAdmin = !!currentUser?.isAdmin;
+    // Client routes
+    {
+      path: "",
+      element: (
+        <PrivateRoute>
+          <ClientGuard />
+        </PrivateRoute>
+      ),
+      children: [
+        { path: "dashboard-client", element: <Dashboard mode="client" /> },
+      ],
+    },
 
-  return (
-    <Routes>
-      {!currentUser && (
-        <>
-          <Route path="/signIn" element={<SignIn />} />
-          <Route path="/signIn-client" element={<SignInClient />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<Navigate to="/signIn" />} />
-        </>
-      )}
-      <Route path="/relatorios/pdf" element={<GeneratePDF />} />
-      {/* Protected Routes */}
-      <Route element={<ResponsiveDrawerLayout />}>
-        {currentUser && (
-          <>
-            <Route
-              path="/relatorios"
-              element={
-                <>
-                  {/* <Reports /> */}
-                  <ReportsProvider>
-                    <Reports />
-                  </ReportsProvider>
-                </>
-              }
-            />
-            {isAdmin && (
-              <>
-                <Route
-                  path="/cadastro"
-                  element={<Navigate to="/cadastro/cliente" />}
-                />
-                <Route path="/dashboard" element={<Dashboard mode="admin" />} />
-                <Route
-                  path="/cadastro/cliente"
-                  element={<Register type="cliente" />}
-                />
-                <Route
-                  path="/cadastro/cooperativa"
-                  element={<Register type="cooperativa" />}
-                />
-                <Route
-                  path="/editar"
-                  element={<Navigate to="/edit/client" />}
-                />
-                <Route path="/edit/client" element={<Edit type="cliente" />} />
-                <Route path="/planejamento" element={<PlanningList />} />
-                <Route path="*" element={<Navigate to="/relatorios" />} />
-              </>
-            )}
+    // Cooperative routes
+    {
+      path: "",
+      element: (
+        <PrivateRoute>
+          <CooperativeGuard />
+        </PrivateRoute>
+      ),
+      children: [
+        {
+          path: "ponto-coleta",
+          element: <CollectionPoint />,
+        },
+        {
+          path: "*",
+          element: <Navigate to="/ponto-coleta" />,
+        },
+      ],
+    },
 
-            {isCooperative && (
-              <>
-                <Route path="/ponto-coleta" element={<CollectionPoint />} />
-                <Route path="*" element={<Navigate to="/ponto-coleta" />} />
-              </>
-            )}
+    // Public routes
+    {
+      path: "signIn",
+      element: <SignIn />,
+    },
+    {
+      path: "signIn-client",
+      element: <SignInClient />,
+    },
+    {
+      path: "forgot-password",
+      element: <ForgotPassword />,
+    },
 
-            {isClient && (
-              <>
-                <Route
-                  path="/dashboard-client"
-                  element={<Dashboard mode="client" />}
-                />
-                <Route path="*" element={<Navigate to="/relatorios" />} />
-              </>
-            )}
-          </>
-        )}
-      </Route>
-    </Routes>
-  );
+    {
+      path: "reset-password",
+      element: <ResetPassword />,
+    },
+
+    // Catch routes
+    {
+      path: "",
+      element: <PrivateRoute />,
+      children: [
+        {
+          path: "*",
+          element: <Navigate to="relatorios" />,
+        },
+      ],
+    },
+  ]);
+
+  return routes;
 };
-
-export default MainRoutes;

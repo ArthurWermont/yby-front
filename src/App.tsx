@@ -2,7 +2,7 @@ import moment from "moment";
 import 'moment/locale/pt-br';
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/auth-context";
-import MainRoutes from "./routes";
+import { Routes } from "./routes";
 
 moment.locale("pt-br");
 
@@ -31,7 +31,7 @@ const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <MainRoutes />
+        <Routes />
       </BrowserRouter>
     </AuthProvider>
   );
