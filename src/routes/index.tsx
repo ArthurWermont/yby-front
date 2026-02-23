@@ -1,5 +1,7 @@
-import { Navigate, useRoutes } from "react-router-dom";
+import { useContext } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import CollectionPoint from "../collection-point/collection-point";
+import { AuthContext } from "../context/auth-context";
 import Dashboard from "../dashboard";
 import Edit from "../edit";
 import ForgotPassword from "../login/forgot-password";
@@ -8,75 +10,91 @@ import SignIn from "../login/signIn-admin";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
-import { AdminGuard } from "./adminGuard";
-import { ClientGuard } from "./clientGuard";
-import { CooperativeGuard } from "./cooperativeGuard";
+import Reports from "../reports_";
+import { ReportsProvider } from "../reports_/context";
+import GeneratePDF from "../reports_/exports/pdf";
+import ResponsiveDrawerLayout from "../template/drawer";
 import { PrivateRoute } from "./privateRoute";
 
-export const Routes = () => {
-  const routes = useRoutes([
-    {
-      path: "/",
-      children: [
-        { path: "signIn", element: <SignIn /> },
-        { path: "signIn-client", element: <SignInClient /> },
-        { path: "forgot-password", element: <ForgotPassword /> },
-        { path: "reset-password", element: <ResetPassword /> },
-      ],
-    },
+export const AppRoutes = () => {
+  const { user: currentUser } = useContext(AuthContext);
+  const isClient = !!currentUser?.client_id;
+  const isCooperative = !!currentUser?.cooperative_id;
+  const isAdmin = !!currentUser?.isAdmin;
 
-    {
-      path: "/",
-      element: <PrivateRoute />,
-      children: [
-        // Admin routes
-        {
-          element: <AdminGuard />,
-          children: [
-            { path: "dashboard", element: <Dashboard mode="admin" /> },
-            {
-              path: "cadastro",
-              children: [
-                {
-                  index: true,
-                  path: "cliente",
-                  element: <Register type="cliente" />,
-                },
-                {
-                  path: "cooperativa",
-                  element: <Register type="cooperativa" />,
-                },
-              ],
-            },
-            { path: "edit/client", element: <Edit type="cliente" /> },
-            { path: "planejamento", element: <PlanningList /> },
-          ],
-        },
+  return (
+    <Routes>
+      {/* Rotas públicas */}
+      <Route path="/signIn" element={<SignIn />} />
+      <Route path="/signIn-client" element={<SignInClient />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/relatorios/pdf" element={<GeneratePDF />} />
 
-        // Client routes
-        {
-          element: <ClientGuard />,
-          children: [
-            { path: "dashboard-client", element: <Dashboard mode="client" /> },
-          ],
-        },
+      {/* Rotas protegidas */}
+      <Route path="/" element={<PrivateRoute />}>
+        <Route element={<ResponsiveDrawerLayout />}>
+          {/* Rotas específicas por role */}
+          {!isCooperative && (
+            <Route
+              path="/relatorios"
+              element={
+                <ReportsProvider>
+                  <Reports />
+                </ReportsProvider>
+              }
+            />
+          )}
 
-        // Cooperative routes
-        {
-          element: <CooperativeGuard />,
-          children: [
-            { path: "ponto-coleta", element: <CollectionPoint /> },
-            { path: "*", element: <Navigate to="/ponto-coleta" /> },
-          ],
-        },
+          {/* Dashboard baseado no tipo de usuário */}
+          <Route path="dashboard" element={<RoleBasedDashboard />} />
 
-        {
-          path: "*",
-          element: <Navigate to="relatorios" />,
-        },
-      ],
-    },
-  ]);
+          {/* Rotas específicas por role */}
+          {isAdmin && (
+            <>
+              <Route
+                path="cadastro/cliente"
+                element={<Register type="cliente" />}
+              />
+              <Route
+                path="cadastro/cooperativa"
+                element={<Register type="cooperativa" />}
+              />
+              <Route path="edit/client" element={<Edit type="cliente" />} />
+              <Route path="planejamento" element={<PlanningList />} />
+            </>
+          )}
 
-  return routes;
+          {/* Rotas específicas por role*/}
+          {isCooperative && (
+            <Route path="ponto-coleta" element={<CollectionPoint />} />
+          )}
+
+          {/* Rota padrão após login */}
+          <Route path="/" element={<DefaultRedirect />} />
+          <Route path="*" element={<Navigate to="/relatorios" />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+};
+
+const RoleBasedDashboard = () => {
+  const { user } = useContext(AuthContext);
+  const isClient = !!user?.client_id;
+  const isAdmin = !!user?.isAdmin;
+
+  if (isAdmin) return <Dashboard mode="admin" />;
+  if (isClient) return <Dashboard mode="client" />;
+  return <Navigate to="/" />;
+};
+
+const DefaultRedirect = () => {
+  const { user } = useContext(AuthContext);
+  const isCooperative = !!user?.cooperative_id;
+
+  if (isCooperative) return <Navigate to="/ponto-coleta" />;
+  return <Navigate to="/relatorios" />;
 };

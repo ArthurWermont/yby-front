@@ -43,13 +43,6 @@ export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     setSearch(newSearch);
   };
 
-  useEffect(() => {
-    console.log("montei");
-    return () => {
-      console.log("desmontei")
-    };
-  }, []);
-
   return (
     <Context.Provider
       value={{

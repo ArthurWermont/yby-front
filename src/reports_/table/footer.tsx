@@ -5,20 +5,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { TableState } from ".";
 import { columns } from "./config";
-import type { TableData } from "./interfaces";
 
-export const Footer = ({
-  data,
-  loading,
-  hasMore,
-}: {
-  data: TableData[];
-  loading: boolean;
-  hasMore: boolean;
-}) => {
+export const Footer = ({ state }: { state: TableState }) => {
   const colLength = columns.length;
-  
+
   return (
     <TableRow>
       <TableCell
@@ -36,17 +28,19 @@ export const Footer = ({
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            gap: "1rem",
             alignItems: "center",
             width: "100%",
           }}
         >
-          <Typography variant="body2" fontWeight="medium">
-            Total: {data.length} registros
-          </Typography>
+          {state.data.length > 0 && (
+            <Typography variant="body2" fontWeight="medium">
+              {state.data.length} de {state.pagination?.total}
+            </Typography>
+          )}
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {loading && (
+            {state.loading && (
               <>
                 <CircularProgress size={16} />
                 <Typography variant="caption" color="text.secondary">
@@ -56,11 +50,13 @@ export const Footer = ({
             )}
           </Box>
 
-          <Typography variant="caption" color="text.secondary">
-            {hasMore
-              ? "Role para baixo para mais"
-              : "Todos os dados carregados"}
-          </Typography>
+          {!state.loading && (
+            <Typography variant="caption" color="text.secondary">
+              {state.hasMore
+                ? "Role para baixo para mais"
+                : "Todos os dados carregados"}
+            </Typography>
+          )}
         </Box>
       </TableCell>
     </TableRow>

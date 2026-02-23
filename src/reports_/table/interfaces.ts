@@ -24,9 +24,11 @@ export interface ColumnData {
 
 export type FetchDataResult = (args: { page: number }) => Promise<{
   data: TableData[];
-  pagination: {
-    limit: number;
-    start: number;
-    total: number;
-  };
+  pagination: Pagination;
 }>;
+
+export interface Pagination {
+  limit: number;
+  start: number;
+  total: number;
+}

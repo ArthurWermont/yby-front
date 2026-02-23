@@ -1,8 +1,8 @@
 import moment from "moment";
-import 'moment/locale/pt-br';
+import "moment/locale/pt-br";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/auth-context";
-import { Routes } from "./routes";
+import { AppRoutes } from "./routes";
 
 moment.locale("pt-br");
 
@@ -10,7 +10,7 @@ moment.locale("pt-br");
 const clearLocalStorageDaily = () => {
   const lastSaveDate = parseInt(
     localStorage.getItem("lastSaveDate") || "0",
-    10
+    10,
   );
   const now = new Date().getTime();
 
@@ -29,11 +29,11 @@ const App = () => {
   clearLocalStorageDaily();
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes />
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 

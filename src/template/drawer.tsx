@@ -180,7 +180,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
           />
         </ListItemButton>
 
-        <ListItemButton onClick={() => navigate("/dashboard-client")}>
+        <ListItemButton onClick={() => navigate("/dashboard")}>
           <ListItemIcon>
             <AnalyticsIcon />
           </ListItemIcon>

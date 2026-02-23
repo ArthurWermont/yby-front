@@ -102,7 +102,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       if (admin) {
         login(formattedAdmin);
-        navigate("/ponto-coleta");
+        navigate("/relatorios");
         setLoading(false);
       }
     } catch (error) {
