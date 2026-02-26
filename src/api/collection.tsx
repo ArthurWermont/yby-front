@@ -175,6 +175,54 @@ const formatCollectionData = (data: any): any[] => {
   });
 };
 
+const getCollectionByDateForClient = async (
+  clientDocumentId: string,
+  startDate: Date,
+  endDate: Date
+) => {
+  try {
+    // 1ª página para saber quantas existem
+    const first = await api.get(
+      `/collections?` +
+      `filters[$and][0][$or][0][collection_date][$notNull]=true&` +
+      `filters[$and][0][$or][0][collection_date][$gte]=${startDate.toISOString()}&` +
+      `filters[$and][0][$or][0][collection_date][$lte]=${endDate.toISOString()}&` +
+      `filters[$and][0][$or][1][collection_date][$null]=true&` +
+      `filters[$and][0][$or][1][createdAt][$gte]=${startDate.toISOString()}&` +
+      `filters[$and][0][$or][1][createdAt][$lte]=${endDate.toISOString()}&` +
+      `filters[$and][1][client][documentId][$eq]=${encodeURIComponent(clientDocumentId)}&` + // <<<< trava pelo cliente
+      `populate=*&pagination[page]=1&pagination[pageSize]=100`
+    );
+
+    const totalPages: number = first.data.meta.pagination.pageCount;
+    const reqs: Promise<any>[] = [];
+
+    for (let page = 1; page <= totalPages; page++) {
+      reqs.push(
+        api.get(
+          `/collections?` +
+          `filters[$and][0][$or][0][collection_date][$notNull]=true&` +
+          `filters[$and][0][$or][0][collection_date][$gte]=${startDate.toISOString()}&` +
+          `filters[$and][0][$or][0][collection_date][$lte]=${endDate.toISOString()}&` +
+          `filters[$and][0][$or][1][collection_date][$null]=true&` +
+          `filters[$and][0][$or][1][createdAt][$gte]=${startDate.toISOString()}&` +
+          `filters[$and][0][$or][1][createdAt][$lte]=${endDate.toISOString()}&` +
+          `filters[$and][1][client][documentId][$eq]=${encodeURIComponent(clientDocumentId)}&` +
+          `populate=*&pagination[page]=${page}&pagination[pageSize]=100`
+        )
+      );
+    }
+
+    const pages = await Promise.all(reqs);
+    const flat = pages.flatMap(r => r.data.data || []);
+    return { data: formatCollectionData(flat) };
+  } catch (e) {
+    console.error("Erro ao buscar coletas do cliente:", e);
+    return { data: [] as any[] };
+  }
+};
+
+
 export {
   createCollection,
   deleteCollection,
@@ -183,4 +231,5 @@ export {
   getCollectionClient,
   getCollectionByDate,
   uploadImage,
+  getCollectionByDateForClient,
 };

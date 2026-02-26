@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface AuthContextProps {
   user: {
@@ -30,11 +31,16 @@ const AuthContext = createContext<AuthContextProps>({
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthContextProps["user"]>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const dadosUsuario = localStorage.getItem("usuario");
     if (dadosUsuario) {
       setUser(JSON.parse(dadosUsuario));
+
+      if (!location.pathname.includes("relatorios/pdf"))
+        navigate("/", { replace: true });
     }
   }, []);
 

@@ -4,9 +4,9 @@ import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { styled as styledComponents } from "styled-components";
 import { authAdmin } from "../api/auth";
 import YbyLogo from "../assets/yby-logo";
@@ -14,6 +14,19 @@ import { AuthContext } from "../context/auth-context";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+
+// 3. Adicionar Imports do Snackbar
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import React from "react";
+
+// Componente Alert customizado (Toast)
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const Card = styledComponents.div`
   display: flex;
@@ -54,6 +67,9 @@ const schema = yup.object().shape({
 export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+  const location = useLocation(); // ⭐️ PARTE 1: Inicializa o useLocation
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -86,7 +102,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       if (admin) {
         login(formattedAdmin);
-        navigate("/ponto-coleta");
+        navigate("/relatorios");
         setLoading(false);
       }
     } catch (error) {
@@ -101,6 +117,27 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         message: "Erro ao fazer login",
       });
     }
+  };
+
+  // ⭐️ PARTE 3: Lógica para ler a mensagem do ResetPassword
+  useEffect(() => {
+    if (location.state && location.state.successMessage) {
+      const msg = location.state.successMessage;
+
+      setSnackbarMessage(msg);
+      setSnackbarOpen(true);
+    }
+  }, [location.state]);
+
+  // ⭐️ PARTE 4: Função para fechar o Snackbar
+  const handleCloseSnackbar = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -189,11 +226,17 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               </FormControl>
             )}
           />
+          {/* <Link style={{ width: "250px" }} to="/forgot-password">
+             Esqueci minha senha
+          </Link>
 
           <Link style={{ width: "250px" }} to="/signIn-client">
             Ir para login da cooperativa.
+          </Link> */}
+          {/* // Dentro do form, antes do botão */}
+          <Link to="/forgot-password" style={{ alignSelf: "flex-start" }}>
+            Esqueci minha senha
           </Link>
-
           <Button
             fullWidth
             type="submit"
@@ -204,7 +247,31 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             {loading ? <CircularProgress size={20} /> : "Entrar"}
           </Button>
         </form>
+        <Typography
+          variant="body2"
+          align="center"
+          style={{ marginTop: "12px" }}
+        >
+          <Link to="/signIn-client">Acessar como cooperativa</Link>
+        </Typography>
       </Card>
+      {/* ⭐️ PARTE 5: Adicionar o componente Snackbar (TOAST) */}
+      {snackbarMessage && ( // Só renderiza se houver mensagem
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity="success" // Cor verde e ícone de sucesso
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      )}
     </SignInContainer>
   );
 }

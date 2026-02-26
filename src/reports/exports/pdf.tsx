@@ -1,14 +1,17 @@
-import { Button } from "@mui/material";
-import { styled } from "@mui/system";
 import {
   Document,
+  Image,
   Page,
-  PDFDownloadLink,
+  PDFViewer,
   StyleSheet,
   Text,
-  View,
+  View
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
+import { reportService } from "../../services/Report.service";
 
 // Estilos do PDF
 const styles = StyleSheet.create({
@@ -16,13 +19,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  logo: {
+    width: 90,
+    height: 90,
+    marginBottom: 8,
+  },
   section: {
+    marginTop: 10,
     marginBottom: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
+    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
   },
   text: {
     fontSize: 12,
@@ -66,31 +81,21 @@ const styles = StyleSheet.create({
   },
 });
 
-// Estilo do botão
-const StyledButton = styled(Button)({
-  backgroundColor: "#15853B",
-  color: "#fff",
-  textTransform: "none",
-  "&:hover": {
-    backgroundColor: "#15853B",
-  },
-});
-
 // Componente para gerar o PDF
 const MyDocument = ({ rows }: any) => {
   const totalWeight = rows.reduce(
     (sum: number, row: any) => sum + parseFloat(row.weight || 0),
-    0
+    0,
   );
 
   return (
     <Document>
       <Page style={styles.page}>
-        <Text style={styles.title}>Relatório de Coleta de Resíduos</Text>
-        <View style={styles.section}>
-          <Text style={styles.text}>
-            Este é o relatório de coleta de resíduos, contendo detalhes sobre
-            cada coleta realizada.
+        <View style={{ alignItems: "center", marginBottom: 25 }}>
+          <Image src="/ybyBlack.png" style={styles.logo} />{" "}
+          <Text style={styles.title}>Relatório de Coleta de Resíduos</Text>
+          <Text style={{ fontSize: 11, textAlign: "center", color: "#444" }}>
+            Dados consolidados das coletas realizadas
           </Text>
         </View>
 
@@ -129,7 +134,7 @@ const MyDocument = ({ rows }: any) => {
           </Text>
           <Text style={styles.text}>
             Total de Resíduos:{" "}
-            {rows.reduce((acc: any, row: any) => acc + row.wastesIds.length, 0)}
+            {rows.reduce((acc: any, row: any) => acc + row.wastes.length, 0)}
           </Text>
         </View>
         <View style={styles.section}>
@@ -149,34 +154,88 @@ const MyDocument = ({ rows }: any) => {
 };
 
 // Componente que cria o link de download para o PDF
-const GeneratePDF = ({ collections }: any) => {
-  // Formatação das coleções para os dados
-  const rows = collections.map((collection: any) => ({
-    documentId: collection.documentId,
-    id: collection.id,
-    pev: collection.pev,
-    waste: collection.waste,
-    weight: collection.weight,
-    createdAt: format(new Date(collection.createdAt), "dd/MM/yyyy | HH:mm"),
-    hasAvaria: collection.imageAvaria ? "Sim" : "Não",
-    imageAvaria: collection.imageAvaria,
-    imageColectorUrl: collection.imageColectorUrl,
-    wastesIds: collection.wastesIds,
-    cooperative: collection.cooperative.cooperative_name,
-  }));
+const GeneratePDF = () => {
+  const [params] = useSearchParams();
+  const [rows, setRows] = useState<any[]>([]);
+
+  const fetchAll = async (page = 1, limit = 500, items = []) => {
+    try {
+      const { data: reportData, meta } = await reportService.getData({
+        documentId: params.get("doc") || "",
+        isAdmin: params.get("client") === "false",
+        page,
+        limit: 100,
+        search: {
+          startDate: params.get("start") || "",
+          endDate: params.get("end") || "",
+          pev: params.get("pev") || "",
+          waste: params.get("waste") || "",
+          sortByDate: "desc",
+        },
+      });
+
+      const accItems = [...items, ...reportData];
+      const hasMore = accItems.length < meta.pagination.total;
+      if (hasMore) {
+        return await fetchAll(page + 1, limit, accItems as any);
+      }
+
+      return accItems;
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const collections = await fetchAll();
+        // Formatação das coleções para os dados
+        const rowsCollection = collections?.map((collection: any) => {
+          const wastesName =
+            collection?.wastes.map((item: any) => item.name).join(", ") || "";
+          return {
+            documentId: collection.documentId,
+            id: collection.id,
+            pev: collection.client.social_name,
+            waste: wastesName,
+            weight: collection.weight,
+            createdAt: format(
+              new Date(collection.createdAt),
+              "dd/MM/yyyy | HH:mm",
+            ),
+            hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
+            wastes: collection.wastes,
+            cooperative: collection.cooperative.cooperative_name,
+          };
+        });
+        setRows(rowsCollection as any);
+      } catch (error) {}
+    })();
+  }, []);
+
+  if (rows.length === 0) {
+    return "carregando";
+  }
 
   return (
-    <PDFDownloadLink
-      document={<MyDocument rows={rows} />}
-      fileName="relatorio_de_coleta.pdf"
-    >
-      {({ loading }) => (
-        <StyledButton>
-          {loading ? "Carregando..." : "Exportar para PDF"}
-        </StyledButton>
-      )}
-    </PDFDownloadLink>
+    <>
+      <GlobalStyles />
+      <PDFViewer>
+        <MyDocument rows={rows} />
+      </PDFViewer>
+    </>
   );
 };
+
+const GlobalStyles = createGlobalStyle`
+  #root{
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    >iframe{
+    height:100%;
+    width:100%;
+    }
+  }
+`;
 
 export default GeneratePDF;
