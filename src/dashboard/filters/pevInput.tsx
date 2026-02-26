@@ -6,7 +6,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { FC, useContext, useEffect, useState } from "react";
+import { type FC, useContext, useEffect, useState } from "react";
 import { getClientsByCNPJs } from "../../api/client";
 import { AuthContext } from "../../context/auth-context";
 import { useDashboardContext } from "../context";
@@ -31,7 +31,6 @@ const PevInput: FC = () => {
         label: client.social_name,
         value: client.documentId,
       }));
-      // console.log(clients)
       setOptions(clients);
     } catch (error) {
       console.error("Erro ao buscar PEVs:", error);
@@ -45,7 +44,6 @@ const PevInput: FC = () => {
   const onChange = (value: string) => {
     const pevName = options.find((o) => o.value == value)?.label;
 
-    console.log(pevName)
     changeFilters({
       pev: value,
       pevName,

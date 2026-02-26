@@ -42,6 +42,7 @@
     "@types/qs": "^6.14.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
+    "@types/xlsx": "^0.0.35",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

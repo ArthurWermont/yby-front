@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FC } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type FC } from "react";
 import { TableVirtuoso } from "react-virtuoso";
 import {
   catchError,
@@ -13,7 +13,6 @@ import {
   Subject,
   switchMap,
   takeUntil,
-  tap,
 } from "rxjs";
 import { useReportsContext, type IContext } from "../context";
 import { rowContent, virtuosoTableComponents } from "./config";
@@ -54,7 +53,7 @@ const INITIAL_STATE: TableState = {
 const OVERSCAN_COUNT = 10;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const ReportTable: FC<ReportTableProps> = ({ fetchData }) => {
+export const ReportTable: FC<ReportTableProps> = memo(({ fetchData }) => {
   const { search } = useReportsContext();
 
   // Estado local para o React (recebe updates do stream)
@@ -185,9 +184,6 @@ export const ReportTable: FC<ReportTableProps> = ({ fetchData }) => {
             return currentState;
         }
       }, INITIAL_STATE),
-
-      // Log para debug (remover em produção)
-      tap((state) => console.log("Novo estado:", state)),
     );
 
     // Subscription
@@ -256,7 +252,7 @@ export const ReportTable: FC<ReportTableProps> = ({ fetchData }) => {
       // useWindowScroll={false}
     />
   );
-};
+});
 
 // function filter<T>(predicate: (value: T) => boolean) {
 //   return (source: any) => source.pipe(

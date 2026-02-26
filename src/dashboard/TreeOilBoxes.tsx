@@ -1,18 +1,18 @@
 import { OilBarrel, Forest, Delete } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
-import { FC, memo, useEffect, useState } from "react";
+import { type FC, memo, useEffect, useState } from "react";
 import { useDashboardContext } from "./context";
 import {
   getCollectionsByMonthOil,
   getCollectionsByMonthTree,
   getDashboardSummaryOil,
   getDashboardSummaryTree,
-  OilDataType,
-  TreeDataType,
+  type OilDataType,
+  type TreeDataType,
 } from "../api/dashboard";
 import moment from "moment";
 
-const BoxesTreeOil: FC = (props) => {
+const BoxesTreeOil: FC = () => {
   const {
     startDate,
     endDate,
@@ -58,7 +58,6 @@ const BoxesTreeOil: FC = (props) => {
       });
 
       const data = await getDataByMonthTree();
-      console.log(data);
       const formatedDataTree = data.map(parseMonth) as TreeDataType[];
 
       setSummaryTree(response.data.totalTrees);

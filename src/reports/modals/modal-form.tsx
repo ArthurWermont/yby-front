@@ -133,6 +133,7 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
                       <MenuItem value={"4"}>Vidro</MenuItem>
                       <MenuItem value={"6"}>Orgânicos</MenuItem>
                       <MenuItem value={"5"}>Reciclaveis Geral</MenuItem>
+                      <MenuItem value={"7"}>Óleo</MenuItem>
                     </Select>
                     {fieldState.error && (
                       <FormHelperText style={{ color: "red" }}>

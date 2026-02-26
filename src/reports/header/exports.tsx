@@ -5,6 +5,7 @@ import { useReportsContext } from "../context";
 import qs from "qs";
 import { useContext } from "react";
 import { AuthContext } from "../../context/auth-context";
+import GenerateExcel from "../exports/excel";
 
 const StyledButton = styled(Button)({
   backgroundColor: "#15853B",
@@ -30,6 +31,7 @@ export const Exports = () => {
     pev,
     waste,
   });
+  
   return (
     <div id="exports">
       {/* <GeneratePDF collections={filteredCollections} />
@@ -42,7 +44,8 @@ export const Exports = () => {
         <StyledButton>Exportar para PDF</StyledButton>
       </Link>
 
-      <StyledButton>Exportar para Excel</StyledButton>
+      {/* <StyledButton>Exportar para Excel</StyledButton> */}
+      <GenerateExcel/>
     </div>
   );
 };

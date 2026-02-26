@@ -1,5 +1,5 @@
 import qs from "qs";
-import type { IContext } from "../reports_/context";
+import type { IContext } from "../reports/context";
 import { BaseService } from "./Base.service";
 
 interface ReportParams {

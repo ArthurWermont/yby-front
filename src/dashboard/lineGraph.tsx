@@ -57,7 +57,6 @@ const LineGraph: FC<LineGraphProps> = () => {
   };
 
   useEffect(() => {
-    console.log(startDate, endDate);
     if (!startDate || !endDate) return;
 
     (async () => {

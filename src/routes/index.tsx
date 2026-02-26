@@ -10,15 +10,14 @@ import SignIn from "../login/signIn-admin";
 import SignInClient from "../login/singin-client";
 import PlanningList from "../plannings";
 import Register from "../register";
-import Reports from "../reports_";
-import { ReportsProvider } from "../reports_/context";
-import GeneratePDF from "../reports_/exports/pdf";
+import Reports from "../reports";
+import { ReportsProvider } from "../reports/context";
+import GeneratePDF from "../reports/exports/pdf";
 import ResponsiveDrawerLayout from "../template/drawer";
 import { PrivateRoute } from "./privateRoute";
 
 export const AppRoutes = () => {
   const { user: currentUser } = useContext(AuthContext);
-  const isClient = !!currentUser?.client_id;
   const isCooperative = !!currentUser?.cooperative_id;
   const isAdmin = !!currentUser?.isAdmin;
 

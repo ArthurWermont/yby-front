@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Typography } from "@mui/material";
 import Modal from "@mui/material/Modal";
 
-const ModalComponent = ({ open, handleClose, images }: any) => {
+const ModalImageComponent = ({ open, handleClose, images }: any) => {
   return (
     <Modal
       open={open}
@@ -93,4 +93,4 @@ const ModalComponent = ({ open, handleClose, images }: any) => {
   );
 };
 
-export default ModalComponent;
+export default ModalImageComponent;

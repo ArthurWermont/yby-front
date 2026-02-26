@@ -1,5 +1,3 @@
-import { Button } from "@mui/material";
-import { styled } from "@mui/system";
 import {
   Document,
   Image,
@@ -80,16 +78,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 10,
     padding: 3,
-  },
-});
-
-// Estilo do botão
-const StyledButton = styled(Button)({
-  backgroundColor: "#15853B",
-  color: "#fff",
-  textTransform: "none",
-  "&:hover": {
-    backgroundColor: "#15853B",
   },
 });
 
@@ -176,7 +164,7 @@ const GeneratePDF = () => {
         documentId: params.get("doc") || "",
         isAdmin: params.get("client") === "false",
         page,
-        limit: 5,
+        limit: 100,
         search: {
           startDate: params.get("start") || "",
           endDate: params.get("end") || "",
@@ -200,7 +188,6 @@ const GeneratePDF = () => {
     (async () => {
       try {
         const collections = await fetchAll();
-        console.log(collections);
         // Formatação das coleções para os dados
         const rowsCollection = collections?.map((collection: any) => {
           const wastesName =
@@ -220,7 +207,6 @@ const GeneratePDF = () => {
             cooperative: collection.cooperative.cooperative_name,
           };
         });
-        console.log(rowsCollection);
         setRows(rowsCollection as any);
       } catch (error) {}
     })();

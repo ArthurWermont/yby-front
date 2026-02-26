@@ -5,11 +5,11 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { getWastes } from "../../api/wastes";
 import { useDashboardContext } from "../context";
-import { IOptions } from "./pevInput";
+import type { IOptions } from "./pevInput";
 
 const WasteInput: FC = () => {
   const [options, setOptions] = useState<IOptions[]>([]);
@@ -24,7 +24,6 @@ const WasteInput: FC = () => {
           label: waste.name,
           value: waste.id,
         }));
-        console.log(residuos);
         setOptions(residuos);
       }
     } catch (error) {

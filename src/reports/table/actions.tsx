@@ -6,9 +6,9 @@ import type { TableData } from "./interfaces";
 
 type Props = {
   rowData: TableData;
-  onEdit: (row: TableData) => void;
-  onDelete: (row: TableData) => void;
-  onViewImage: (row: TableData) => void;
+  onEdit: (open: boolean, row?: TableData) => void;
+  onDelete: (open: boolean, row?: TableData) => void;
+  onViewImage: (open: boolean, row?: TableData) => void;
   isClient: Boolean;
 };
 
@@ -23,18 +23,18 @@ export const TableActions = ({
     <>
       {!isClient ? (
         <>
-          <IconButton onClick={() => onEdit(rowData)}>
+          <IconButton onClick={() => onEdit(true, rowData)}>
             <EditIcon style={{ color: "#9B9794" }} />
           </IconButton>
-          <IconButton onClick={() => onDelete(rowData)}>
+          <IconButton onClick={() => onDelete(true, rowData)}>
             <DeleteIcon style={{ color: "#9B9794" }} />
           </IconButton>
-          <IconButton onClick={() => onViewImage(rowData)}>
+          <IconButton onClick={() => onViewImage(true, rowData)}>
             <ImageIcon style={{ color: "#9B9794" }} />
           </IconButton>
         </>
       ) : (
-        <IconButton onClick={() => onViewImage(rowData)}>
+        <IconButton onClick={() => onViewImage(true, rowData)}>
           <ImageIcon style={{ color: "#9B9794" }} />
         </IconButton>
       )}
