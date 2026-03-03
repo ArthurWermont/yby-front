@@ -105,6 +105,7 @@ const LineGraph: FC<LineGraphProps> = () => {
               />
               <Line
                 type="linear"
+                name="Peso"
                 dataKey="totalWeight"
                 stroke="#4B3838"
                 strokeWidth={2}

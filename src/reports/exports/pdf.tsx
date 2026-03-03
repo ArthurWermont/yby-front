@@ -5,7 +5,7 @@ import {
   PDFViewer,
   StyleSheet,
   Text,
-  View
+  View,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
@@ -84,7 +84,8 @@ const styles = StyleSheet.create({
 // Componente para gerar o PDF
 const MyDocument = ({ rows }: any) => {
   const totalWeight = rows.reduce(
-    (sum: number, row: any) => sum + parseFloat(row.weight || 0),
+    (sum: number, row: any) =>
+      sum + parseFloat(`${row.weight ?? 0}`.replace(",", ".")),
     0,
   );
 
@@ -204,7 +205,7 @@ const GeneratePDF = () => {
             ),
             hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
             wastes: collection.wastes,
-            cooperative: collection.cooperative.cooperative_name,
+            cooperative: collection?.cooperative?.cooperative_name,
           };
         });
         setRows(rowsCollection as any);

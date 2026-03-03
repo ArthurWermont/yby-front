@@ -47,7 +47,7 @@ const Report = () => {
 
         weight: collection?.weight || "",
 
-        cooperative: collection?.cooperative.cooperative_name || "",
+        cooperative: collection?.cooperative?.cooperative_name || "",
 
         imageAvaria: collection?.breakdown?.url || "",
         imageColectorUrl: collection.colector?.url || "",

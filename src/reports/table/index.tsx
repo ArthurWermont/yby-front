@@ -19,6 +19,7 @@ import { rowContent, virtuosoTableComponents } from "./config";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import type { FetchDataResult, Pagination, TableData } from "./interfaces";
+import { Button } from "@mui/material";
 
 interface ReportTableProps {
   fetchData: FetchDataResult;
@@ -214,23 +215,11 @@ export const ReportTable: FC<ReportTableProps> = memo(({ fetchData }) => {
     actionSubject.current.next({ type: "RETRY" });
   }, []);
 
-  // Scroll to top when search changes
-  useEffect(() => {
-    if (virtuosoRef.current && state.data.length > 0) {
-      // @ts-ignore
-      virtuosoRef.current.scrollToIndex({
-        index: 0,
-        align: "start",
-        behavior: "smooth",
-      });
-    }
-  }, [search, state.data.length]);
-
   if (state.error) {
     return (
       <div className="error-container">
         <p>Erro ao carregar dados: {state.error.message}</p>
-        <button onClick={retry}>Tentar novamente</button>
+        <Button onClick={retry}>Tentar novamente</Button>
       </div>
     );
   }
@@ -247,15 +236,8 @@ export const ReportTable: FC<ReportTableProps> = memo(({ fetchData }) => {
       fixedHeaderContent={Header}
       fixedFooterContent={() => <Footer state={state} />}
 
-      //  // Melhorias de performance
-      // increaseViewportBy={{ top: 20, bottom: 20 }}
-      // useWindowScroll={false}
+      increaseViewportBy={{ top: 20, bottom: 20 }}
+      useWindowScroll={false}
     />
   );
 });
-
-// function filter<T>(predicate: (value: T) => boolean) {
-//   return (source: any) => source.pipe(
-//     (obs: any) => obs.filter(predicate)
-//   );
-// }
