@@ -48,6 +48,14 @@ const GenerateExcel = () => {
     } catch (error) {}
   };
 
+  const sum = (data: any[] = [], key: string) => {
+    return data.reduce((acc, cur) => {
+      const valueFormatted = `${cur[key] ?? 0}`.replace(",", ".");
+      acc = acc + parseFloat(valueFormatted);
+      return  acc;
+    }, 0);
+  };
+
   const createSheet = async () => {
     const workbook = XLSX.utils.book_new();
     const collections = await fetchAll();
@@ -71,7 +79,7 @@ const GenerateExcel = () => {
         PEV: collection.client.social_name,
         "Tipo de Resíduos": wastesName,
         "Coleta (kg)": collection.weight,
-        Cooperativa: collection.cooperative.cooperative_name,
+        Cooperativa: collection?.cooperative?.cooperative_name,
         Avaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
       };
     });
@@ -88,10 +96,7 @@ const GenerateExcel = () => {
     ];
     worksheetResume["!cols"] = colunas;
 
-    const total = dataSheet?.reduce((acc, cur) => {
-      acc = acc + +cur["Coleta (kg)"];
-      return acc;
-    }, 0);
+    const total = sum(dataSheet, "Coleta (kg)"); 
 
     XLSX.utils.sheet_add_aoa(
       worksheetResume,
@@ -118,10 +123,7 @@ const GenerateExcel = () => {
 
       worksheet["!cols"] = colunas;
 
-      const total = data?.reduce((acc, cur) => {
-        acc = acc + +cur["Coleta (kg)"];
-        return acc;
-      }, 0);
+      const total = sum(data, "Coleta (kg)");
 
       XLSX.utils.sheet_add_aoa(
         worksheet,

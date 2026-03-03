@@ -92,6 +92,7 @@ const LineGraphWater: FC<LineGraphProps> = () => {
               />
               <Line
                 type="linear"
+                name="Litros"
                 dataKey="totalLitros"
                 stroke="#0070C0"
                 strokeWidth={2}

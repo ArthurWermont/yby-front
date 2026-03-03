@@ -1,3 +1,4 @@
+import moment from "moment";
 import qs from "qs";
 import type { IContext } from "../reports/context";
 import { BaseService } from "./Base.service";
@@ -99,8 +100,8 @@ class ReportService extends BaseService {
     if (search.startDate && search.endDate) {
       (filters.$and ||= []).push({
         createdAt: {
-          $gte: search.startDate,
-          $lte: search.endDate,
+          $gte: moment(search.startDate).startOf("day").toISOString(),
+          $lte: moment(search.endDate).endOf("day").toISOString(),
         },
       });
     }
