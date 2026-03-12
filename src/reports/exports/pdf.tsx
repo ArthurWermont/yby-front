@@ -115,7 +115,7 @@ const MyDocument = ({ rows }: any) => {
           {/* Corpo da Tabela */}
           {rows.map((row: any) => (
             <View key={row.id} style={styles.tableRow}>
-              <Text style={styles.tableCell}>{row.createdAt}</Text>
+              <Text style={styles.tableCell}>{row.collection_date}</Text>
               <Text style={styles.tableCell}>{row.pev}</Text>
               <Text style={styles.tableCell}>{row.waste}</Text>
               <Text style={styles.tableCell}>{row.weight}</Text>
@@ -199,8 +199,8 @@ const GeneratePDF = () => {
             pev: collection.client.social_name,
             waste: wastesName,
             weight: collection.weight,
-            createdAt: format(
-              new Date(collection.createdAt),
+            collection_date: format(
+              new Date(collection.collection_date),
               "dd/MM/yyyy | HH:mm",
             ),
             hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",

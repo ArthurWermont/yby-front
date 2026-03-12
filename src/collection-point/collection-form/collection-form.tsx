@@ -109,7 +109,7 @@ export default function CollectionForm({
         },
         (err) => {
           console.error("Erro ao obter localização:", err);
-        }
+        },
       );
     } else {
     }
@@ -119,7 +119,7 @@ export default function CollectionForm({
     event: React.ChangeEvent<HTMLInputElement>,
     setImage: (url: string) => void,
     setFile: (file: File) => void,
-    setType: "coletorImage" | "avariaImage"
+    setType: "coletorImage" | "avariaImage",
   ) => {
     if (event?.target?.files) {
       const selectedFile = event.target.files?.[0];
@@ -135,7 +135,7 @@ export default function CollectionForm({
   const handleClearImage = (
     setImage: (url: string) => void,
     setFile: any,
-    setType: "coletorImage" | "avariaImage"
+    setType: "coletorImage" | "avariaImage",
   ) => {
     setImage("");
     setFile(null);
@@ -190,7 +190,7 @@ export default function CollectionForm({
 
       const cooperative = cooperatives.data.find(
         (cooperative: any) =>
-          cooperative.user.username === currentUser?.username
+          cooperative.user.username === currentUser?.username,
       );
 
       const formatData = {
@@ -211,6 +211,7 @@ export default function CollectionForm({
           : null,
         latitude: location?.latitude?.toString() || null,
         longitude: location?.longitude?.toString() || null,
+        collection_date: new Date().toISOString(),
       };
 
       const idsSalvos = localStorage.getItem("ids")
@@ -304,7 +305,7 @@ export default function CollectionForm({
                         <MenuItem value={pev.id}>
                           {`${pev.social_name} - ${pev.adress_data[0].street}, ${pev.adress_data[0].number} - ${pev.adress_data[0].neighborhood} `}
                         </MenuItem>
-                      )
+                      ),
                     )}
                   </Select>
                   {fieldState.error && (
@@ -418,7 +419,7 @@ export default function CollectionForm({
                     handleClearImage(
                       setColetorImage,
                       setColetorFile,
-                      "coletorImage"
+                      "coletorImage",
                     )
                   }
                   size="medium"
@@ -460,7 +461,7 @@ export default function CollectionForm({
                 event,
                 setColetorImage,
                 setColetorFile,
-                "coletorImage"
+                "coletorImage",
               )
             }
             accept="image/*"
@@ -582,7 +583,7 @@ export default function CollectionForm({
                         handleClearImage(
                           setAvariaImage,
                           setAvariaFile,
-                          "avariaImage"
+                          "avariaImage",
                         )
                       }
                       size="medium"
@@ -634,7 +635,7 @@ export default function CollectionForm({
                     event,
                     setAvariaImage,
                     setAvariaFile,
-                    "avariaImage"
+                    "avariaImage",
                   )
                 }
                 accept="image/*"

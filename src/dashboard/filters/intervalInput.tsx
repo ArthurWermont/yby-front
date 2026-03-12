@@ -1,6 +1,6 @@
 import { Box, TextField } from "@mui/material";
 import moment from "moment";
-import { FC, MouseEvent } from "react";
+import type { FC, MouseEvent } from "react";
 import { useDashboardContext } from "../context";
 
 const IntervalInput: FC = () => {

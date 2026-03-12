@@ -1,5 +1,5 @@
 import { Paper, Typography, Box } from "@mui/material";
-import { FC, memo, useEffect, useState } from "react";
+import { type FC, memo, useEffect, useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useDashboardContext } from "./context";
 import { getWasteDistribution } from "../api/dashboard";

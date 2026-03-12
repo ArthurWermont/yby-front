@@ -18,7 +18,7 @@ export const columns: ColumnData[] = [
     width: 100,
   },
   {
-    dataKey: "createdAt",
+    dataKey: "collection_date",
     label: "Data | Horário",
     width: 200,
   },

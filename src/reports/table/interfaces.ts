@@ -11,7 +11,7 @@ export interface TableData {
   imageAvaria: string;
   imageColectorUrl: string;
   wastesIds: string[];
-  createdAt: string;
+  collection_date: string;
   actions: ReactNode;
 }
 

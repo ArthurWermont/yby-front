@@ -1,10 +1,10 @@
 import {
   Box,
 } from "@mui/material";
-import { FC } from "react";
+import type { FC } from "react";
+import IntervalInput from "./intervalInput";
 import PevInput from "./pevInput";
 import WasteInput from "./wasteInput";
-import IntervalInput from "./intervalInput";
 
 const Filters: FC = () => {
   return (

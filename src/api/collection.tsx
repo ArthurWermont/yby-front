@@ -170,7 +170,7 @@ const formatCollectionData = (data: any): any[] => {
   return data.map((item: any) => {
     return {
       ...item,
-      createdAt: item.collection_date ? new Date(item.collection_date) : item.createdAt,
+      collection_date: item.collection_date ? new Date(item.collection_date) : item.createdAt,
     };
   });
 };

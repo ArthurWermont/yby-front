@@ -1,6 +1,6 @@
 import { EnergySavingsLeaf, WaterDrop } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
-import { FC, memo, useEffect, useState } from "react";
+import { type FC, memo, useEffect, useState } from "react";
 import {
   getDashboardSummaryEnergy,
   getDashboardSummaryWater,
