@@ -7,7 +7,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
-import {
+import type {
   EnergyDataType,
   IByWaste,
   OilDataType,

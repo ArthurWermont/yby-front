@@ -15,7 +15,7 @@ export const Header = () => {
   return (
     <TableRow>
       {columns.map((column) => {
-        if (column.dataKey === "createdAt") {
+        if (column.dataKey === "collection_date") {
           return (
             <TableCell
               key={column.dataKey}

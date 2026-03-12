@@ -42,7 +42,7 @@ class ReportService extends BaseService {
           start: (+page - 1) * limit,
           limit: limit,
         },
-        sort: [`createdAt:${search.sortByDate || "desc"}`],
+        sort: [`collection_date:${search.sortByDate || "desc"}`],
       };
 
       if (!isAdmin) {
@@ -99,7 +99,7 @@ class ReportService extends BaseService {
 
     if (search.startDate && search.endDate) {
       (filters.$and ||= []).push({
-        createdAt: {
+        collection_date: {
           $gte: moment(search.startDate).startOf("day").toISOString(),
           $lte: moment(search.endDate).endOf("day").toISOString(),
         },

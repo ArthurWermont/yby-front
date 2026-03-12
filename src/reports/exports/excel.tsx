@@ -73,7 +73,7 @@ const GenerateExcel = () => {
 
       return {
         "Data | Horário": format(
-          new Date(collection.createdAt),
+          new Date(collection.collection_date),
           "dd/MM/yyyy | HH:mm",
         ),
         PEV: collection.client.social_name,

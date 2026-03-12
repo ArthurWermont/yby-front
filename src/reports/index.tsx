@@ -53,7 +53,7 @@ const Report = () => {
         imageColectorUrl: collection.colector?.url || "",
         hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
 
-        createdAt: format(collection?.createdAt, "dd/MM/yyyy | HH:mm") || "",
+        collection_date: format(collection?.collection_date, "dd/MM/yyyy | HH:mm") || "",
       } as TableData;
 
       formattedCollection.actions = (
