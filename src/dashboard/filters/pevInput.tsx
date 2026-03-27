@@ -27,10 +27,16 @@ const PevInput: FC = () => {
   const fetchOptionsPev = async () => {
     try {
       const response = await getClientsByCNPJs([]);
-      const clients = response.data.map((client: any) => ({
-        label: client.social_name,
-        value: client.documentId,
-      }));
+      const clients = response.data
+        .map((client: any) => ({
+          label: client.social_name,
+          value: client.documentId,
+        }))
+        .sort((a: IOptions, b: IOptions) =>
+          (a.label || "").localeCompare(b.label || "", "pt-BR", {
+            sensitivity: "base",
+          }),
+        );
       setOptions(clients);
     } catch (error) {
       console.error("Erro ao buscar PEVs:", error);

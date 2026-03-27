@@ -1,5 +1,5 @@
 import api from "../api";
-import { ByMonthParams } from "./byMonth";
+import type { ByMonthParams } from "./byMonth";
 
 export type EnergyDataType = {
   month: string;
@@ -7,10 +7,9 @@ export type EnergyDataType = {
 };
 
 export async function getCollectionsByMonthEnergy(
-  params: ByMonthParams
+  params: ByMonthParams,
 ): Promise<EnergyDataType[]> {
-
-  const {data} = await api.get("/collections/dashboard/by-energy-month", {
+  const { data } = await api.get("/collections/dashboard/by-energy-month", {
     params,
   });
   return data;

@@ -1,10 +1,10 @@
 import {
   Document,
+  Image,
   Page,
   StyleSheet,
   Text,
   View,
-  Image,
 } from "@react-pdf/renderer";
 import { format } from "date-fns";
 import type {
@@ -33,6 +33,9 @@ interface DashboardPDFProps {
 
   weightSummary?: number;
   waterSummary?: number;
+  cO2Summary?: number;
+  cO2SummaryValue?: number;
+  recoveredValueSummary?: number;
   energySummary?: number;
   oilSummary?: number;
   treeSummary?: number;
@@ -133,30 +136,57 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
   },
+  cardGroup: {
+    marginBottom: 18,
+  },
+
+  cardGroupTitle: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#6D5C5C",
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+
   cardRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    gap: 12,
-    marginBottom: 20,
+    justifyContent: "space-between",
+    rowGap: 10,
+    columnGap: 10,
   },
 
   currentMonthCard: {
-    backgroundColor: "#FAF1E8",
-    padding: 12,
-    borderRadius: 8,
-    width: "23%",
-    minWidth: "23%", // evita quebra feia
-    maxWidth: "23%", // tudo alinhadinho
+    backgroundColor: "#F8F3ED",
+    borderRadius: 10,
+    paddingTop: 10,
+    paddingRight: 12,
+    paddingBottom: 12,
+    paddingLeft: 12,
+    width: "23.5%",
+    borderWidth: 1,
+    borderColor: "#E7DDD2",
   },
 
   currentMonthCardWeight: {
-    backgroundColor: "#FAF1E8",
-    padding: 12,
-    borderRadius: 8,
-    width: "23%",
-    borderTopWidth: 4,
-    borderTopColor: "#4B3838", // cor institucional YBY
+    backgroundColor: "#F8F3ED",
+    borderRadius: 10,
+    paddingTop: 10,
+    paddingRight: 12,
+    paddingBottom: 12,
+    paddingLeft: 12,
+    width: "23.5%",
+    borderWidth: 1,
+    borderColor: "#E7DDD2",
+    borderTopWidth: 5,
+    borderTopColor: "#4B3838",
+  },
+
+  cardLabel: {
+    fontSize: 9,
+    color: "#7B6F6F",
+    marginBottom: 6,
+    fontWeight: "medium",
   },
 
   cardSubtitle: {
@@ -167,39 +197,63 @@ const styles = StyleSheet.create({
   },
 
   cardTitleEnergy: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
-    color: "#F1592A",
-    marginBottom: 5,
+    color: "#4B3838",
+    marginBottom: 6,
   },
   cardTitleWater: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
-    color: "#005C87",
-    marginBottom: 5,
+    color: "#4B3838",
+    marginBottom: 6,
+  },
+  cardTitleCO2: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#4B3838",
+    marginBottom: 6,
+  },
+  cardTitleCO2Value: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#4B3838",
+    marginBottom: 6,
+  },
+  cardTitleRecoveredValue: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#4B3838",
+    marginBottom: 6,
   },
   cardTitleOil: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
-    color: "#0D0D0D",
-    marginBottom: 5,
+    color: "#4B3838",
+    marginBottom: 6,
   },
   cardTitleTree: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
-    color: "#1FA64C",
-    marginBottom: 5,
+    color: "#4B3838",
+    marginBottom: 6,
   },
   cardTitleWeight: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: "bold",
     color: "#4B3838",
-    marginBottom: 5,
+    marginBottom: 6,
   },
   cardValue: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#4B3838",
+    color: "#2F2927",
+    lineHeight: 1.2,
+  },
+  cardUnit: {
+    fontSize: 9,
+    color: "#8A7D7D",
+    marginTop: 2,
   },
   wastesDistribution: {
     marginTop: 15,
@@ -227,8 +281,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const formatNumber = (value: number) => {
-  return value.toLocaleString("pt-BR", {
+const formatNumber = (value: number | undefined) => {
+  return (value ?? 0).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -264,11 +318,14 @@ const DashboardPDF = ({
   energySummary,
   oilSummary,
   treeSummary,
+  cO2Summary,
+  cO2SummaryValue,
+  recoveredValueSummary,
   dataResiduos = [],
 }: DashboardPDFProps) => {
   const periodLabel = `${format(
     new Date(`${startDate}T00:00:00`),
-    "dd/MM/yyyy"
+    "dd/MM/yyyy",
   )} até ${format(new Date(`${endDate}T23:59:59.999Z`), "dd/MM/yyyy")}`;
 
   // const totalWeight = dataLinhaState.reduce((sum, item) => sum + item.peso, 0);
@@ -311,30 +368,77 @@ const DashboardPDF = ({
             <Text style={styles.filterText}>Cliente: {pevName}</Text>
           )}
         </View>
-        <View style={styles.cardRow}>
-          <View style={styles.currentMonthCardWeight}>
-            <Text style={styles.cardTitleWeight}>Peso Coletado</Text>
-            <Text style={styles.cardValue}>{weightSummary} Kg</Text>
-          </View>
+        <View style={styles.cardGroup}>
+          <Text style={styles.cardGroupTitle}>Indicadores ambientais</Text>
 
-          <View style={styles.currentMonthCard}>
-            <Text style={styles.cardTitleEnergy}>Energia Economizada</Text>
-            <Text style={styles.cardValue}>{energySummary} MWh</Text>
-          </View>
+          <View style={styles.cardRow}>
+            <View style={styles.currentMonthCardWeight}>
+              <Text style={styles.cardTitleWeight}>Peso Coletado</Text>
+              <Text style={styles.cardValue}>
+                {formatNumber(weightSummary)}
+              </Text>
+              <Text style={styles.cardUnit}>kg</Text>
+            </View>
 
-          <View style={styles.currentMonthCard}>
-            <Text style={styles.cardTitleWater}>Água Economizada</Text>
-            <Text style={styles.cardValue}>{waterSummary} L</Text>
-          </View>
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleEnergy}>Energia Economizada</Text>
+              <Text style={styles.cardValue}>
+                {formatNumber(energySummary)}
+              </Text>
+              <Text style={styles.cardUnit}>MWh</Text>
+            </View>
 
-          <View style={styles.currentMonthCard}>
-            <Text style={styles.cardTitleOil}>Petróleo Economizado</Text>
-            <Text style={styles.cardValue}>{oilSummary} L</Text>
-          </View>
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleWater}>Água Economizada</Text>
+              <Text style={styles.cardValue}>{formatNumber(waterSummary)}</Text>
+              <Text style={styles.cardUnit}>Litros</Text>
+            </View>
 
-          <View style={styles.currentMonthCard}>
-            <Text style={styles.cardTitleTree}>Árvores Poupadas</Text>
-            <Text style={styles.cardValue}>{treeSummary ?? 0}</Text>
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleCO2}>CO2e Evitado</Text>
+              <Text style={styles.cardValue}>{formatNumber(cO2Summary)}</Text>
+              <Text style={styles.cardUnit}>kg CO2e</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.cardGroup}>
+          <Text style={styles.cardGroupTitle}>
+            Indicadores de valor e equivalência
+          </Text>
+
+          <View style={styles.cardRow}>
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleCO2Value}>
+                Valor Climático Estimado
+              </Text>
+              <Text style={styles.cardValue}>
+                R$ {formatNumber(cO2SummaryValue)}
+              </Text>
+              <Text style={styles.cardUnit}>baseado no CO2e evitado</Text>
+            </View>
+
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleRecoveredValue}>
+                Benefício Socioambiental
+              </Text>
+              <Text style={styles.cardValue}>
+                R$ {formatNumber(recoveredValueSummary)}
+              </Text>
+              <Text style={styles.cardUnit}>valor estimado recuperado</Text>
+            </View>
+
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleOil}>Petróleo Economizado</Text>
+              <Text style={styles.cardValue}>{formatNumber(oilSummary)}</Text>
+              <Text style={styles.cardUnit}>Litros</Text>
+            </View>
+
+            <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleTree}>Árvores Poupadas</Text>
+              <Text style={styles.cardValue}>{formatNumber(treeSummary)}</Text>
+              <Text style={styles.cardUnit}>unidades equivalentes</Text>
+            </View>
           </View>
         </View>
 
@@ -408,13 +512,16 @@ const DashboardPDF = ({
             <View style={styles.totalsCol}>
               <Text style={styles.summaryTitle}>Totais do Período</Text>
               <Text style={styles.summaryText}>
-                Total de Peso Coletado: {weightSummary} kg
+                Total de Peso Coletado: {formatNumber(weightSummary)} kg
               </Text>
               <Text style={styles.summaryText}>
-                Total de Energia Economizada: {energySummary} MWh
+                Total de Energia Economizada: {formatNumber(energySummary)} MWh
               </Text>
               <Text style={styles.summaryText}>
-                Total de Água Economizada: {waterSummary} Litros
+                Total de Água Economizada: {formatNumber(waterSummary)} Litros
+              </Text>
+              <Text style={styles.summaryText}>
+                CO2 Evitado: {formatNumber(cO2Summary)} kg CO2e
               </Text>
             </View>
           </View>
@@ -425,10 +532,17 @@ const DashboardPDF = ({
           <View style={styles.totalsRow}>
             <View style={styles.totalsCol}>
               <Text style={styles.summaryText}>
-                Total de Petróleo Economizado: {oilSummary} Litros
+                Valor Climático Estimado: {formatNumber(cO2SummaryValue)} R$
               </Text>
               <Text style={styles.summaryText}>
-                Total de Árvores Poupadas: {treeSummary ?? 0}{" "}
+                Benefício Socioambiental: {formatNumber(recoveredValueSummary)}{" "}
+                R$
+              </Text>
+              <Text style={styles.summaryText}>
+                Total de Petróleo Economizado: {formatNumber(oilSummary)} Litros
+              </Text>
+              <Text style={styles.summaryText}>
+                Total de Árvores Poupadas: {formatNumber(treeSummary) ?? 0}{" "}
               </Text>
 
               <Text style={styles.summaryText}>

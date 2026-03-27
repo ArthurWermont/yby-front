@@ -23,6 +23,9 @@ interface DashboardReport {
   treeByMonth?: TreeDataType[];
   weightSummary?: number;
   waterSummary?: number;
+  cO2Summary?:number;
+  cO2SummaryValue?:number;
+  recoveredValueSummary?:number;
   energySummary?: number;
   oilSummary?: number;
   treeSummary?: number;
