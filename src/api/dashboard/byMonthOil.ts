@@ -1,5 +1,5 @@
 import api from "../api";
-import { ByMonthParams } from "./byMonth";
+import type { ByMonthParams } from "./byMonth";
 
 export type OilDataType = {
   month: string;

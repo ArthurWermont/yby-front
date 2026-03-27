@@ -1,16 +1,18 @@
-import { OilBarrel, Forest, Delete } from "@mui/icons-material";
-import { Box, Paper, Typography } from "@mui/material";
+import { Delete, Forest, MonetizationOn, OilBarrel } from "@mui/icons-material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import moment from "moment";
 import { type FC, memo, useEffect, useState } from "react";
-import { useDashboardContext } from "./context";
 import {
   getCollectionsByMonthOil,
   getCollectionsByMonthTree,
   getDashboardSummaryOil,
+  getDashboardSummaryRecoveredValue,
   getDashboardSummaryTree,
   type OilDataType,
   type TreeDataType,
 } from "../api/dashboard";
-import moment from "moment";
+import { useDashboardContext } from "./context";
 
 const BoxesTreeOil: FC = () => {
   const {
@@ -22,6 +24,7 @@ const BoxesTreeOil: FC = () => {
   } = useDashboardContext();
   const [summaryTree, setSummaryTree] = useState<any>(0);
   const [summaryOil, setSummaryOil] = useState<any>(0);
+  const [summaryRecoveredValue, setSummaryRecoveredValue] = useState<any>(0);
 
   const getDataByMonthTree = async () => {
     return getCollectionsByMonthTree({
@@ -85,8 +88,21 @@ const BoxesTreeOil: FC = () => {
       });
     };
 
+    const fetchSummaryRecoveredValue = async () => {
+      const response = await getDashboardSummaryRecoveredValue({
+        start: startDate,
+        end: endDate,
+        pevId,
+        wasteId,
+      });
+
+      setSummaryRecoveredValue(response.data.totalRecoveredValue);
+      setReport({ recoveredValueSummary: response.data.totalRecoveredValue });
+    };
+
     fetchSummaryTree();
     fetchSummaryOil();
+    fetchSummaryRecoveredValue();
   }, [pevId, startDate, endDate, wasteId]);
 
   const formatNumber = (value: number) => {
@@ -100,10 +116,18 @@ const BoxesTreeOil: FC = () => {
     <Box display="flex" flexDirection="column" gap={2}>
       {[
         {
+          icon: <MonetizationOn sx={{ color: "white" }} />,
+          bg: "#2E7D32",
+          label: "BENEFÍCIO SOCIOAMBIENTAL",
+          value: "R$ " + formatNumber(summaryRecoveredValue),
+          tooltip:
+            "Valor estimado do retorno positivo para a sociedade gerado pela reciclagem dos materiais coletados.",
+        },
+        {
           icon: <OilBarrel sx={{ color: "white" }} />,
           bg: "#005C87",
           label: "PETRÓLEO",
-          value: formatNumber(summaryOil) + "L",
+          value: formatNumber(summaryOil) + " L",
         },
         {
           icon: <Forest sx={{ color: "white" }} />,
@@ -115,12 +139,13 @@ const BoxesTreeOil: FC = () => {
           icon: <Delete sx={{ color: "white" }} />,
           bg: "#4B3838",
           label: "ESPAÇO EM ATERRO SANITÁRIO (m²)",
-          value: 3000 + "M²",
+          value: 3000 + " M²",
         },
       ].map((item, i) => (
         <Paper
           key={i}
           sx={{
+            position: "relative",
             display: "flex",
             alignItems: "center",
             gap: 2,
@@ -130,6 +155,22 @@ const BoxesTreeOil: FC = () => {
           }}
           elevation={1}
         >
+          {item.tooltip && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 6,
+                right: 6,
+              }}
+            >
+              <Tooltip title={item.tooltip}>
+                <IconButton size="small" sx={{ color: "#8A8A8A" }}>
+                  <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
+
           <Box
             sx={{
               backgroundColor: item.bg,
@@ -142,6 +183,7 @@ const BoxesTreeOil: FC = () => {
           >
             {item.icon}
           </Box>
+
           <Box>
             <Typography variant="caption" color="gray">
               {item.label}

@@ -130,7 +130,7 @@ export default function DashAdmin() {
             <Box
               sx={{
                 display: "flex",
-                gap: 2,
+                gap: 1.8,
                 justifyContent: "flex-start",
                 flexWrap: "wrap",
                 marginTop: 2,
