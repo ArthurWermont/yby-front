@@ -208,7 +208,7 @@ const BoxesWaterEnergy: FC = (props) => {
           </Typography>
 
           <Typography fontWeight={700} fontSize={16}>
-            {summaryCO2.toFixed(2)} kg CO2e
+            {formatNumber(summaryCO2)} kg CO2e
           </Typography>
         </Box>
       </Paper>

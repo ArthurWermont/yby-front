@@ -532,11 +532,11 @@ const DashboardPDF = ({
           <View style={styles.totalsRow}>
             <View style={styles.totalsCol}>
               <Text style={styles.summaryText}>
-                Valor Climático Estimado: {formatNumber(cO2SummaryValue)} R$
+                Valor Climático Estimado: R$ {formatNumber(cO2SummaryValue)} 
               </Text>
               <Text style={styles.summaryText}>
-                Benefício Socioambiental: {formatNumber(recoveredValueSummary)}{" "}
-                R$
+                Benefício Socioambiental: R$ {formatNumber(recoveredValueSummary)}{" "}
+                
               </Text>
               <Text style={styles.summaryText}>
                 Total de Petróleo Economizado: {formatNumber(oilSummary)} Litros
