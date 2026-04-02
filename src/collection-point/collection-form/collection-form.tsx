@@ -56,6 +56,7 @@ const schema = yup.object().shape({
     .required("Residuos é obrigatório")
     .min(1, "Residuos é obrigatório"),
   weight: yup.string().required("Peso é obrigatório"),
+  unit: yup.string().required("Unidade é obrigatória"),
   coletorImage: yup.string().required("Foto do coletor é obrigatória"),
   avariaImage: yup.string(),
 });
@@ -78,6 +79,7 @@ export default function CollectionForm({
       collectionPoint: selectedPEV?.id?.toString() || "",
       residuos: [],
       weight: undefined,
+      unit: "kg",
       avariaImage: undefined,
       coletorImage: undefined,
     },
@@ -178,13 +180,87 @@ export default function CollectionForm({
         }
       }
 
-      const { weight, collectionPoint, residuos } = data;
+      const { weight, unit, collectionPoint, residuos } = data;
+
+      const numericWeight = Number(String(weight).replace(",", "."));
+
+      if (isNaN(numericWeight) || numericWeight <= 0) {
+        setError("weight", { message: "Informe uma quantidade válida." });
+        setLoading(false);
+        return;
+      }
 
       const wastes = residuos.map((residuo: any) => {
         return {
           id: residuo,
         };
       });
+
+      const wasteDensities: Record<string, number> = {
+        Plástico: 1.41,
+        Metal: 2.7,
+        Vidro: 2.5,
+        Papel: 0.8,
+        Orgânicos: 1.1,
+        Óleo: 0.9,
+        "Recicláveis Geral": 1.4,
+      };
+
+      const wasteNamesById: Record<string, string> = {
+        "1": "Plástico",
+        "2": "Papel",
+        "3": "Metal",
+        "4": "Vidro",
+        "5": "Recicláveis Geral",
+        "6": "Orgânicos",
+        "7": "Óleo",
+      };
+
+      const convertToKg = (
+        value: number,
+        unit: string,
+        selectedWasteName: string,
+      ) => {
+        if (unit === "kg") return value;
+
+        const density = wasteDensities[selectedWasteName];
+
+        if (!density) {
+          throw new Error("Esse resíduo não possui densidade cadastrada.");
+        }
+
+        return value * density;
+      };
+
+      const selectedWasteName = wasteNamesById[String(residuos[0])];
+
+      if (unit === "L" && residuos.length !== 1) {
+        setError("residuos", {
+          message: "Para informar em litros, selecione apenas um resíduo.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (unit === "L" && !selectedWasteName) {
+        setError("residuos", {
+          message: "Resíduo inválido para conversão.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      let weightInKg = numericWeight;
+
+      if (unit === "L") {
+        try {
+          weightInKg = convertToKg(numericWeight, unit, selectedWasteName);
+        } catch (error: any) {
+          setError("weight", { message: error.message });
+          setLoading(false);
+          return;
+        }
+      }
 
       const cooperatives = await getCooperatives();
 
@@ -198,7 +274,7 @@ export default function CollectionForm({
           id: cooperative?.id,
         },
         wastes: wastes,
-        weight,
+        weight: String(weightInKg),
         client_id: collectionPoint,
         client: {
           id: collectionPoint,
@@ -475,30 +551,74 @@ export default function CollectionForm({
             </FormHelperText>
           )}
 
-          <Controller
-            name={`weight`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <FormControl fullWidth sx={{ maxWidth: "350px" }}>
-                <TextField
-                  style={{ marginTop: "16px" }}
-                  {...field}
-                  id="weight"
-                  placeholder="medida em Kilos ou Litros"
-                  required
-                  label="Medida (Kg/L)"
-                  variant="outlined"
-                  autoComplete="off"
-                  error={fieldState.error ? true : false}
-                />
-                {fieldState.error && (
-                  <FormHelperText style={{ color: "red" }}>
-                    {fieldState.error.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-            )}
-          />
+          <div
+            style={{
+              display: "flex",
+              gap: "16px",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+              marginTop: "16px",
+            }}
+          >
+            <Controller
+              name="weight"
+              control={control}
+              render={({ field, fieldState }) => (
+                <FormControl fullWidth sx={{ maxWidth: "350px" }}>
+                  <TextField
+                    {...field}
+                    id="weight"
+                    placeholder="Digite a quantidade"
+                    required
+                    label="Medida (Kg/L)"
+                    variant="outlined"
+                    autoComplete="off"
+                    error={fieldState.error ? true : false}
+                  />
+                  {fieldState.error && (
+                    <FormHelperText style={{ color: "red" }}>
+                      {fieldState.error.message}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+
+            <Controller
+              name="unit"
+              control={control}
+              render={({ field, fieldState }) => (
+                <FormControl>
+                  <Typography
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      marginBottom: "8px",
+                    }}
+                  ></Typography>
+
+                  <RadioGroup row {...field}>
+                    <FormControlLabel
+                      value="kg"
+                      control={<Radio />}
+                      label="Kg"
+                    />
+                    <FormControlLabel
+                      value="L"
+                      control={<Radio />}
+                      label="Litros"
+                    />
+                  </RadioGroup>
+
+                  {fieldState.error && (
+                    <FormHelperText style={{ color: "red" }}>
+                      {fieldState.error.message}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          </div>
         </div>
 
         <div style={{ marginTop: "20px" }}>
