@@ -34,7 +34,7 @@ export const columns: ColumnData[] = [
   },
   {
     width: 150,
-    label: "Coleta (Kg/L)",
+    label: "Coleta (Kg)",
     dataKey: "weight",
   },
   {

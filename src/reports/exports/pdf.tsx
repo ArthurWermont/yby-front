@@ -107,7 +107,7 @@ const MyDocument = ({ rows }: any) => {
             <Text style={styles.tableCell}>Data | Horário</Text>
             <Text style={styles.tableCell}>PEV</Text>
             <Text style={styles.tableCell}>Tipo de Resíduos</Text>
-            <Text style={styles.tableCell}>Coleta (Kg/L)</Text>
+            <Text style={styles.tableCell}>Coleta (Kg)</Text>
             <Text style={styles.tableCell}>Cooperativa</Text>
             <Text style={styles.tableCell}>Avaria</Text>
           </View>
