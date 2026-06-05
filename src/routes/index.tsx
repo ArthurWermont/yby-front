@@ -59,7 +59,13 @@ export const AppRoutes = () => {
                 path="cadastro/cooperativa"
                 element={<Register type="cooperativa" />}
               />
+              <Route
+                path="cadastro/gestor"
+                element={<Register type="gestor" />}
+              />
               <Route path="edit/client" element={<Edit type="cliente" />} />
+              <Route path="edit/cooperative" element={<Edit type="cooperative" />} />
+              <Route path="edit/manager" element={<Edit type="manager" />} />
               <Route path="planejamento" element={<PlanningList />} />
             </>
           )}
@@ -84,9 +90,11 @@ const RoleBasedDashboard = () => {
   const { user } = useContext(AuthContext);
   const isClient = !!user?.client_id;
   const isAdmin = !!user?.isAdmin;
+  const isManager = !!user?.isManager;
 
   if (isAdmin) return <Dashboard mode="admin" />;
   if (isClient) return <Dashboard mode="client" />;
+  if (isManager) return <Dashboard mode="manager" />;
   return <Navigate to="/" />;
 };
 

@@ -17,7 +17,9 @@ export type IOptions = {
 };
 
 const PevInput: FC = () => {
-  const { pev, changeFilters, mode } = useDashboardContext();
+  const { pev, changeFilters, selectedPevs, selectedPevNames, mode } =
+    useDashboardContext();
+
   const [options, setOptions] = useState<IOptions[]>([]);
 
   const { user } = useContext(AuthContext);
@@ -26,6 +28,40 @@ const PevInput: FC = () => {
 
   const fetchOptionsPev = async () => {
     try {
+      if (mode === "manager") {
+        const managerOptions: IOptions[] = (
+          (user?.manager?.clients ?? [])
+            .map((client) => ({
+              label: client.social_name || client.documentId || "Cliente",
+              value: client.documentId || "",
+            }))
+            .filter((item) => !!item.value) as IOptions[]
+        ).sort((a, b) =>
+          (a.label || "").localeCompare(b.label || "", "pt-BR", {
+            sensitivity: "base",
+          }),
+        );
+
+        setOptions(managerOptions);
+        return;
+      }
+
+      if (mode === "client") {
+        if (!clientDocId) {
+          setOptions([]);
+          return;
+        }
+
+        setOptions([
+          {
+            label:
+              (user as any)?.client?.social_name || user?.username || "Cliente",
+            value: clientDocId,
+          },
+        ]);
+        return;
+      }
+
       const response = await getClientsByCNPJs([]);
       const clients = response.data
         .map((client: any) => ({
@@ -45,23 +81,43 @@ const PevInput: FC = () => {
 
   useEffect(() => {
     fetchOptionsPev();
-  }, []);
+  }, [mode, user]);
 
-  const onChange = (value: string) => {
-    const pevName = options.find((o) => o.value == value)?.label;
+  // const onChange = (value: string) => {
+  //   const pevName = options.find((o) => o.value === value)?.label || "";
+
+  //   changeFilters({
+  //     pev: value,
+  //     pevName,
+  //   });
+  // };
+
+  const onChangeMultiple = (values: string[]) => {
+    const selectedNames = options
+      .filter((option) => values.includes(option.value))
+      .map((option) => option.label);
 
     changeFilters({
-      pev: value,
-      pevName,
+      selectedPevs: values,
+      selectedPevNames: selectedNames,
     });
   };
 
   useEffect(() => {
-    if (options.length > 0) {
-      onChange(clientDocId!);
-    }
-  }, [options]);
+    if (options.length === 0) return;
 
+    if (mode === "client" && clientDocId && selectedPevs.length === 0) {
+      onChangeMultiple([clientDocId]);
+      return;
+    }
+
+    if (mode === "manager" && selectedPevs.length === 0) {
+      onChangeMultiple([options[0].value]);
+      return;
+    }
+  }, [options, mode, clientDocId, selectedPevs.length]);
+
+  const canClear = mode === "admin" && selectedPevs.length > 0;
   return (
     <FormControl sx={{ width: 230 }}>
       <InputLabel id="pev-label">
@@ -69,19 +125,35 @@ const PevInput: FC = () => {
       </InputLabel>
       <Select
         labelId="pev-label"
-        value={pev}
-        onChange={(e) => onChange(e.target.value)}
+        multiple={mode !== "client"}
+        value={mode === "client" ? (selectedPevs[0] ?? "") : selectedPevs}
+        onChange={(e) => onChangeMultiple(e.target.value as string[])}
         label={mode !== "client" ? "Selecionar PEV" : "PEV selecionado"}
         readOnly={mode === "client"}
+        renderValue={(selected) => {
+          const values = selected as string[];
+
+          if (values.length === 0) {
+            return "";
+          }
+
+          const names =
+            selectedPevNames.length > 0
+              ? selectedPevNames
+              : options
+                  .filter((option) => values.includes(option.value))
+                  .map((option) => option.label);
+
+          return names.join(", ");
+        }}
         endAdornment={
-          pev &&
-          mode !== "client" && (
+          canClear && (
             <IconButton
               size="small"
               sx={{ marginRight: 2 }}
               onClick={(e) => {
                 e.stopPropagation();
-                onChange("");
+                onChangeMultiple([]);
               }}
             >
               <CloseIcon fontSize="small" />

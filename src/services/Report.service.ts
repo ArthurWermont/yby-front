@@ -5,6 +5,8 @@ import { BaseService } from "./Base.service";
 
 interface ReportParams {
   documentId?: string;
+  managerClientIds?: string[];
+  isManager?: boolean;
   page: number;
   limit?: number;
   isAdmin?: boolean;
@@ -24,6 +26,8 @@ class ReportService extends BaseService {
     try {
       const {
         documentId = "",
+        managerClientIds = [],
+        isManager = false,
         isAdmin = false,
         page,
         limit = 50,
@@ -46,12 +50,65 @@ class ReportService extends BaseService {
       };
 
       if (!isAdmin) {
-        filters["$or"] = [{ client: { documentId: { $eq: documentId } } }];
+        if (isManager) {
+          const selectedClient = search.selectedClient || "";
 
-        const cnpjs = await this.getClientsCNPJ(documentId);
-        cnpjs?.forEach((cnpj) => {
-          filters["$or"].push({ client: { cnpj: { $in: cnpj } } });
-        });
+          if (!selectedClient) {
+            filters["client"] = {
+              documentId: {
+                $in: managerClientIds,
+              },
+            };
+          } else {
+            if (!managerClientIds.includes(selectedClient)) {
+              throw new Error("Cliente não permitido para este gestor.");
+            }
+
+            filters["$or"] = [
+              {
+                client: {
+                  documentId: {
+                    $eq: selectedClient,
+                  },
+                },
+              },
+            ];
+
+            const cnpjs = await this.getClientsCNPJ(selectedClient);
+
+            if (cnpjs.length > 0) {
+              filters["$or"].push({
+                client: {
+                  cnpj: {
+                    $in: cnpjs,
+                  },
+                },
+              });
+            }
+          }
+        } else {
+          filters["$or"] = [
+            {
+              client: {
+                documentId: {
+                  $eq: documentId,
+                },
+              },
+            },
+          ];
+
+          const cnpjs = await this.getClientsCNPJ(documentId);
+
+          if (cnpjs.length > 0) {
+            filters["$or"].push({
+              client: {
+                cnpj: {
+                  $in: cnpjs,
+                },
+              },
+            });
+          }
+        }
       }
 
       if (search) {
@@ -78,7 +135,17 @@ class ReportService extends BaseService {
         data: { data },
       } = await this.api.get(`/clients/${documentId}`);
 
-      return data.clients;
+      const clients = data?.clients;
+
+      if (Array.isArray(clients)) {
+        return clients.map((client) => String(client).trim()).filter(Boolean);
+      }
+
+      if (typeof clients === "string" && clients.trim()) {
+        return [clients.trim()];
+      }
+
+      return [];
     } catch (error) {
       throw new Error("Erro ao buscar o clientes CNPJ");
     }
@@ -92,6 +159,16 @@ class ReportService extends BaseService {
         client: {
           social_name: {
             $contains: search.pev,
+          },
+        },
+      });
+    }
+
+    if (search.cooperative) {
+      (filters.$and ||= []).push({
+        cooperative: {
+          documentId: {
+            $eq: search.cooperative,
           },
         },
       });

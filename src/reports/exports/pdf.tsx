@@ -126,7 +126,7 @@ const MyDocument = ({ rows }: any) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.text}>
-            Peso Total das Coletas: {totalWeight} Kilos ou Litros
+            Peso Total das Coletas: {totalWeight.toFixed(2)} Kilos ou Litros
           </Text>
           <Text style={styles.text}>Total de Coletas: {rows.length}</Text>
           <Text style={styles.text}>
@@ -161,20 +161,35 @@ const GeneratePDF = () => {
 
   const fetchAll = async (page = 1, limit = 500, items = []) => {
     try {
+      const storedUser = localStorage.getItem("usuario");
+      const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+      const isAdmin = !!currentUser?.isAdmin;
+      const isManager = !!currentUser?.isManager;
+      const isClient = !!currentUser?.client_id;
+
+      const managerClientIds = isManager
+        ? (currentUser?.manager?.clients ?? [])
+            .map((client: any) => client.documentId)
+            .filter((id: string | undefined): id is string => !!id)
+        : [];
       const { data: reportData, meta } = await reportService.getData({
-        documentId: params.get("doc") || "",
-        isAdmin: params.get("client") === "false",
+        documentId: isClient ? currentUser?.client_id || "" : "",
+        isAdmin,
+        isManager,
+        managerClientIds,
         page,
         limit: 100,
         search: {
           startDate: params.get("start") || "",
           endDate: params.get("end") || "",
           pev: params.get("pev") || "",
+          cooperative: params.get("cooperative") || "",
           waste: params.get("waste") || "",
           sortByDate: "desc",
+          selectedClient: params.get("selectedClient") || "",
         },
       });
-
       const accItems = [...items, ...reportData];
       const hasMore = accItems.length < meta.pagination.total;
       if (hasMore) {

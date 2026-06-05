@@ -262,6 +262,8 @@ export default function CollectionForm({
         }
       }
 
+      const roundedWeightInKg = Number(weightInKg.toFixed(2));
+
       const cooperatives = await getCooperatives();
 
       const cooperative = cooperatives.data.find(
@@ -274,7 +276,7 @@ export default function CollectionForm({
           id: cooperative?.id,
         },
         wastes: wastes,
-        weight: String(weightInKg),
+        weight: String(roundedWeightInKg),
         client_id: collectionPoint,
         client: {
           id: collectionPoint,

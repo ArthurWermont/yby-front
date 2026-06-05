@@ -18,7 +18,7 @@ const BoxesWaterEnergy: FC = (props) => {
   const {
     startDate,
     endDate,
-    pev: pevId,
+    selectedPevs,
     waste: wasteId,
     setReport,
   } = useDashboardContext();
@@ -27,12 +27,14 @@ const BoxesWaterEnergy: FC = (props) => {
   const [summaryCO2, setSummaryCO2] = useState<any>(0);
   const [summaryCO2Value, setSummaryCO2Value] = useState<any>(0);
 
+  const pevKey = selectedPevs.join("|");
+
   useEffect(() => {
     const fetchSummaryWater = async () => {
       const response = await getDashboardSummaryWater({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -44,7 +46,7 @@ const BoxesWaterEnergy: FC = (props) => {
       const response = await getDashboardSummaryEnergy({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -56,7 +58,7 @@ const BoxesWaterEnergy: FC = (props) => {
       const response = await getDashboardSummaryCO2({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -69,7 +71,7 @@ const BoxesWaterEnergy: FC = (props) => {
     fetchSummaryWater();
     fetchSummaryEnergy();
     fetchSummaryCO2();
-  }, [pevId, startDate, endDate, wasteId]);
+  }, [pevKey, startDate, endDate, wasteId]);
 
   const formatNumber = (value: number) => {
     return value.toLocaleString("pt-BR", {

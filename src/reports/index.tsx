@@ -13,22 +13,33 @@ import type { TableData } from "./table/interfaces";
 const Report = () => {
   const { search, onForm, onImage, onDelete } = useReportsContext();
   const { user: currentUser } = useContext(AuthContext);
+  const isAdmin = !!currentUser?.isAdmin;
+  const isManager = !!currentUser?.isManager;
   const isClient = !!currentUser?.client_id;
 
-  const fetchData = useCallback(async ({ page }: { page: number }) => {
-    const { data: reportData, meta } = await reportService.getData({
-      documentId: currentUser?.client_id,
-      isAdmin: !isClient,
-      page,
-      limit: 100,
-      search,
-    });
+  const fetchData = useCallback(
+    async ({ page }: { page: number }) => {
+      const { data: reportData, meta } = await reportService.getData({
+        documentId: isClient ? currentUser?.client_id || "" : "",
+        isAdmin,
+        isManager,
+        managerClientIds: isManager
+          ? (currentUser?.manager?.clients ?? [])
+              .map((client) => client.documentId)
+              .filter((id): id is string => !!id)
+          : [],
+        page,
+        limit: 100,
+        search,
+      });
 
-    return {
-      data: parseTableData(reportData),
-      pagination: meta.pagination,
-    };
-  }, [search, currentUser, isClient]);
+      return {
+        data: parseTableData(reportData),
+        pagination: meta.pagination,
+      };
+    },
+    [search, currentUser, isClient, isAdmin, isManager],
+  );
 
   const parseTableData = (data: any[] = []) => {
     return data.map((collection: any) => {
@@ -53,7 +64,8 @@ const Report = () => {
         imageColectorUrl: collection.colector?.url || "",
         hasAvaria: Boolean(collection?.breakdown?.url) ? "Sim" : "Não",
 
-        collection_date: format(collection?.collection_date, "dd/MM/yyyy | HH:mm") || "",
+        collection_date:
+          format(collection?.collection_date, "dd/MM/yyyy | HH:mm") || "",
       } as TableData;
 
       formattedCollection.actions = (
@@ -62,7 +74,7 @@ const Report = () => {
           onEdit={onForm}
           onDelete={onDelete}
           onViewImage={onImage}
-          isClient={isClient}
+          isClient={isClient || isManager}
         />
       );
 

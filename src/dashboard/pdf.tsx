@@ -17,11 +17,11 @@ import type {
 } from "../api/dashboard";
 
 interface DashboardPDFProps {
-  mode: "admin" | "client";
+  mode: "admin" | "client" | "manager";
   startDate: string;
   endDate: string;
-  pevId?: string;
-  pevName?: string;
+  selectedPevs?: string [];
+  selectedPevNames?: string[];
   waste?: string;
   wasteName?: string;
 
@@ -33,6 +33,7 @@ interface DashboardPDFProps {
 
   weightSummary?: number;
   waterSummary?: number;
+  landFillSpaceSummary?: number;
   cO2Summary?: number;
   cO2SummaryValue?: number;
   recoveredValueSummary?: number;
@@ -302,8 +303,8 @@ const DashboardPDF = ({
   mode,
   startDate,
   endDate,
-  pevId,
-  pevName,
+  selectedPevs,
+  selectedPevNames,
   waste,
   wasteName,
 
@@ -318,6 +319,7 @@ const DashboardPDF = ({
   energySummary,
   oilSummary,
   treeSummary,
+  landFillSpaceSummary,
   cO2Summary,
   cO2SummaryValue,
   recoveredValueSummary,
@@ -336,19 +338,24 @@ const DashboardPDF = ({
 
   const isAdmin = mode === "admin";
   const isClient = mode === "client";
+  const isManager = mode === "manager";
   // const hasSelectedPev = !!selectedPev;
 
   // const showYbyThisMonth =
   //   isAdmin && !hasSelectedPev && periodLabel === "Últimos 6 meses";
+
+  const reportTitle = isAdmin
+    ? "Relatório Geral"
+    : isManager
+      ? "Relatório do Gestor"
+      : "Relatório do Cliente";
 
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>
-              {isAdmin ? "Relatório Geral" : "Relatório do Cliente"}
-            </Text>
+            <Text style={styles.title}>{reportTitle}</Text>
             <Text style={styles.subtitle}>Período: {periodLabel}</Text>
           </View>
 
@@ -357,7 +364,13 @@ const DashboardPDF = ({
         {/* Filtros */}
         <View style={styles.filters}>
           {isAdmin && (
-            <Text style={styles.filterText}>PEV: {pevName || "Todos"}</Text>
+            <Text style={styles.filterText}>PEV: {selectedPevNames!.join(", ") || "Todos"}</Text>
+          )}
+
+          {isManager && (
+            <Text style={styles.filterText}>
+              Clientes: {selectedPevNames!.join(", ") || "Todos os meus clientes"}
+            </Text>
           )}
 
           <Text style={styles.filterText}>
@@ -365,7 +378,7 @@ const DashboardPDF = ({
           </Text>
 
           {isClient && (
-            <Text style={styles.filterText}>Cliente: {pevName}</Text>
+            <Text style={styles.filterText}>Cliente: {selectedPevNames}</Text>
           )}
         </View>
         <View style={styles.cardGroup}>
@@ -393,6 +406,12 @@ const DashboardPDF = ({
               <Text style={styles.cardValue}>{formatNumber(waterSummary)}</Text>
               <Text style={styles.cardUnit}>Litros</Text>
             </View>
+
+            {/* <View style={styles.currentMonthCard}>
+              <Text style={styles.cardTitleWater}>ESPAÇO EM ATERRO SANITÁRIO (m²)</Text>
+              <Text style={styles.cardValue}>{formatNumber(landFillSpaceSummary)}</Text>
+              <Text style={styles.cardUnit}>m³</Text>
+            </View> */}
 
             <View style={styles.currentMonthCard}>
               <Text style={styles.cardTitleCO2}>CO2e Evitado</Text>
@@ -521,6 +540,10 @@ const DashboardPDF = ({
                 Total de Água Economizada: {formatNumber(waterSummary)} Litros
               </Text>
               <Text style={styles.summaryText}>
+                Espaço em Aterro Sanitário: {formatNumber(landFillSpaceSummary)}{" "}
+                m³
+              </Text>
+              <Text style={styles.summaryText}>
                 CO2 Evitado: {formatNumber(cO2Summary)} kg CO2e
               </Text>
             </View>
@@ -532,11 +555,11 @@ const DashboardPDF = ({
           <View style={styles.totalsRow}>
             <View style={styles.totalsCol}>
               <Text style={styles.summaryText}>
-                Valor Climático Estimado: R$ {formatNumber(cO2SummaryValue)} 
+                Valor Climático Estimado: R$ {formatNumber(cO2SummaryValue)}
               </Text>
               <Text style={styles.summaryText}>
-                Benefício Socioambiental: R$ {formatNumber(recoveredValueSummary)}{" "}
-                
+                Benefício Socioambiental: R${" "}
+                {formatNumber(recoveredValueSummary)}{" "}
               </Text>
               <Text style={styles.summaryText}>
                 Total de Petróleo Economizado: {formatNumber(oilSummary)} Litros

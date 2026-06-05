@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { styled as styledComponents } from "styled-components";
-import { authAdmin } from "../api/auth";
+import { authAdmin, getMe } from "../api/auth";
 import YbyLogo from "../assets/yby-logo";
 import { AuthContext } from "../context/auth-context";
 
@@ -16,17 +16,16 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 // 3. Adicionar Imports do Snackbar
+import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import React from "react";
 
 // Componente Alert customizado (Toast)
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+  function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  },
+);
 
 const Card = styledComponents.div`
   display: flex;
@@ -67,7 +66,7 @@ const schema = yup.object().shape({
 export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-  const location = useLocation(); // ⭐️ PARTE 1: Inicializa o useLocation
+  const location = useLocation();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -90,16 +89,46 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         password: data.adminPassword,
       });
 
+      if (!admin) {
+        throw new Error("Erro ao fazer login");
+      }
+
+      const me = await getMe(admin.jwt);
+
+      if (!me) {
+        throw new Error("Erro ao carregar dados do usuário");
+      }
+
+      const isManager = me.role?.name === "gestor";
+      const managerClients = me.manager?.clients ?? [];
+
       const formattedAdmin = {
         jwt: admin.jwt,
-        username: admin.user.username,
-        documentId: admin.user.documentId,
-        email: admin.user.email,
-        isAdmin: admin.user.admin,
-        id: admin.user.id,
-        client_id: admin.user.client_id,
+        username: me.username,
+        documentId: me.documentId,
+        email: me.email,
+        isAdmin: me.admin,
+        isManager,
+        role: me.role?.name ?? null,
+        id: me.id,
+        client_id: me.client_id ?? null,
+        cooperative_id: me.cooperative_id ?? null,
+
+        // Mantém compatibilidade com o resto do sistema.
+        // Para gestor, clients vem da nova arquitetura: manager.clients.
+        // Para outros usuários, mantém o comportamento antigo.
+        clients: isManager ? managerClients : (me.clients ?? []),
+
+        // Nova estrutura correta do gestor.
+        manager: me.manager
+          ? {
+              documentId: me.manager.documentId,
+              clients: managerClients,
+            }
+          : null,
       };
 
+      console.log("formattedAdmin :>> ", formattedAdmin);
       if (admin) {
         login(formattedAdmin);
         navigate("/relatorios");
@@ -132,7 +161,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   // ⭐️ PARTE 4: Função para fechar o Snackbar
   const handleCloseSnackbar = (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === "clickaway") {
       return;

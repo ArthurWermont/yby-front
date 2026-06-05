@@ -55,7 +55,7 @@ const PhoneMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
         overwrite
       />
     );
-  }
+  },
 );
 
 const CNPJMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
@@ -75,7 +75,7 @@ const CNPJMaskCustom = React.forwardRef<HTMLInputElement, CustomProps>(
         overwrite
       />
     );
-  }
+  },
 );
 
 const schema = yup.object().shape({
@@ -94,7 +94,7 @@ const schema = yup.object().shape({
     .email("Formato de e-mail inválido")
     .matches(
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "E-mail inválido"
+      "E-mail inválido",
     ),
   client_phone: yup
     .string()
@@ -128,7 +128,7 @@ export type ClientFormProps = {
   client_neighborhood: string;
   client_state: string;
   client_city: string;
-  client_clients: { value: string; label: string}[];
+  client_clients: { value: string; label: string }[];
 };
 
 type Props = {
@@ -175,6 +175,38 @@ export default function ClientForm({
   });
 
   useEffect(() => {
+    reset({
+      client_clients,
+      client_cnpj,
+      client_socialName,
+      client_responsibleName,
+      client_email,
+      client_phone,
+      client_cep,
+      client_street,
+      client_street_number,
+      client_neighborhood,
+      client_state,
+      client_city,
+    });
+  }, [
+    document_id,
+    client_clients,
+    client_cnpj,
+    client_socialName,
+    client_responsibleName,
+    client_email,
+    client_phone,
+    client_cep,
+    client_street,
+    client_street_number,
+    client_neighborhood,
+    client_state,
+    client_city,
+    reset,
+  ]);
+
+  useEffect(() => {
     getClients().then((res) => {
       const data = res.data.map((client: any) => {
         return {
@@ -189,26 +221,21 @@ export default function ClientForm({
   const onSubmit = async (data: any) => {
     setLoading(true);
 
-    data.client_cnpj = data.client_cnpj.replace(/[./-]/g, "");
-    data.client_phone = data.client_phone.replace(/[()\s-]/g, "");
-    data.client_cep = data.client_cep.replace(/[-]/g, "");
-
-    // todo: ajustar ordem de criacao no back , para nao ter 2 empresas publicadas com msm nome
     try {
       const updatedClient = await updateClient({
         document_id,
-        cnpj: data.client_cnpj,
+        cnpj: data.client_cnpj.replace(/[./-]/g, ""),
         social_name: data.client_socialName,
         responsible_name: data.client_responsibleName,
         email: data.client_email,
-        phone: data.client_phone,
+        phone: data.client_phone.replace(/[()\s-]/g, ""),
         password: data.client_password,
-        clients: data.client_clients.map(
-          (c: { value: string; label: string }) => c.value
+        clients: (data.client_clients ?? []).map(
+          (c: { value: string; label: string }) => c.value,
         ),
         adress_data: {
           documentId: client_address_document_id,
-          cep: data.client_cep,
+          cep: data.client_cep.replace(/[-]/g, ""),
           street: data.client_street,
           number: data.client_street_number,
           neighborhood: data.client_neighborhood,
@@ -216,18 +243,20 @@ export default function ClientForm({
           state: data.client_state,
         },
       });
+
       if (updatedClient) {
         alert("Cliente atualizado com sucesso!");
-        // window.location.reload();
-
-        setLoading(false);
+        window.location.reload();
+        return;
       }
+
+      alert("Erro ao atualizar cliente");
+    } catch (error: any) {
+      console.error("Erro ao atualizar cliente:", error);
+      console.error("Detalhes do erro:", error?.response?.data);
+      alert("Erro ao atualizar cliente");
+    } finally {
       setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error creating client:", error);
-      alert("Erro ao criar cliente");
-      reset();
     }
   };
 

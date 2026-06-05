@@ -46,6 +46,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
   const isClient = !!user?.client_id;
   const isCooperative = !!user?.cooperative_id;
   const isAdmin = !!user?.isAdmin;
+  const isManager = !!user?.isManager;
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
@@ -109,6 +110,12 @@ export default function ResponsiveDrawerLayout(props: Props) {
                 onClick={() => navigate("/cadastro/cooperativa")}
               />
             </ListItemButton>
+            <ListItemButton sx={{ pl: 4 }}>
+              <ListItemText
+                primary="Gestor"
+                onClick={() => navigate("/cadastro/gestor")}
+              />
+            </ListItemButton>
           </List>
         </Collapse>
 
@@ -160,6 +167,26 @@ export default function ResponsiveDrawerLayout(props: Props) {
               onClick={() => navigate("/edit/client")}
             >
               <ListItemText primary="Clientes" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+        <Collapse in={openEdit} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => navigate("/edit/cooperative")}
+            >
+              <ListItemText primary="Cooperativas" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+        <Collapse in={openEdit} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => navigate("/edit/manager")}
+            >
+              <ListItemText primary="Gestores" />
             </ListItemButton>
           </List>
         </Collapse>
@@ -224,6 +251,7 @@ export default function ResponsiveDrawerLayout(props: Props) {
 
       {isAdmin && <AdminMenu />}
       {isClient && <ClientMenu />}
+      {isManager && <ClientMenu />}
       {isCooperative && <CooperativeMenu />}
 
       <Box sx={{ position: "absolute", bottom: 0, width: "100%" }}>

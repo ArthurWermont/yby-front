@@ -8,9 +8,28 @@ interface AuthContextProps {
     documentId: string;
     email: string;
     isAdmin: boolean;
+    isManager?: boolean;
+    role?: string | null;
     id: number;
-    cooperative_id?: string;
-    client_id?: string;
+    cooperative_id?: string | null;
+    client_id?: string | null;
+    clients?: {
+      id: number;
+      documentId?: string;
+      client_id?: string;
+      social_name?: string;
+    }[];
+
+    // NOVO: relação correta para o gestor na nova arquitetura
+    manager?: {
+      documentId?: string;
+      clients?: {
+        id: number;
+        documentId?: string;
+        client_id?: string;
+        social_name?: string;
+      }[];
+    } | null;
   } | null;
   login: (user: {
     jwt: string;
@@ -18,7 +37,28 @@ interface AuthContextProps {
     documentId: string;
     email: string;
     isAdmin: boolean;
+    isManager?: boolean;
+    role?: string | null;
     id: number;
+    cooperative_id?: string | null;
+    client_id?: string | null;
+    clients?: {
+      id: number;
+      documentId?: string;
+      client_id?: string;
+      social_name?: string;
+    }[];
+
+    // NOVO: relação correta para o gestor na nova arquitetura
+    manager?: {
+      documentId?: string;
+      clients?: {
+        id: number;
+        documentId?: string;
+        client_id?: string;
+        social_name?: string;
+      }[];
+    } | null;
   }) => void;
   logout: () => void;
 }
@@ -50,7 +90,28 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     documentId: string;
     email: string;
     isAdmin: boolean;
+    isManager?: boolean;
+    role?: string | null;
     id: number;
+    cooperative_id?: string | null;
+    client_id?: string | null;
+    clients?: {
+      id: number;
+      documentId?: string;
+      client_id?: string;
+      social_name?: string;
+    }[];
+
+    // NOVO: relação correta para o gestor na nova arquitetura
+    manager?: {
+      documentId?: string;
+      clients?: {
+        id: number;
+        documentId?: string;
+        client_id?: string;
+        social_name?: string;
+      }[];
+    } | null;
   }) => {
     localStorage.setItem("usuario", JSON.stringify(user));
     setUser(user);
