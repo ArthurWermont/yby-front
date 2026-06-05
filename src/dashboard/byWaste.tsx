@@ -8,14 +8,15 @@ const ByWaste: FC = (props) => {
   const {
     startDate,
     endDate,
-    pev: pevId,
+    selectedPevs,
     waste: wasteId,
     setReport,
   } = useDashboardContext();
   const [dataResiduos, setDataResiduos] = useState<
     { name: string; value: number }[]
   >([]);
-  
+
+  const pevKey = selectedPevs.join("|");
   const COLORS = [
     "#4B3838",
     "#1FA64C",
@@ -32,7 +33,7 @@ const ByWaste: FC = (props) => {
         const response = await getWasteDistribution({
           start: startDate,
           end: endDate,
-          pevId,
+          pevId: selectedPevs,
           wasteId,
         });
         setDataResiduos(response.data);
@@ -43,9 +44,9 @@ const ByWaste: FC = (props) => {
       }
     };
     fetchWasteData();
-  }, [startDate, endDate, pevId, wasteId]);
+  }, [startDate, endDate, pevKey, wasteId]);
 
-  const wasteTitle = pevId
+  const wasteTitle = pevKey
     ? "Tipo de resíduo coletado no período — PEV"
     : "Tipo de resíduo coletado no período — Yby";
 

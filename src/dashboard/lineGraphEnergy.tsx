@@ -22,18 +22,20 @@ const LineGraphEnergy: FC<LineGraphProps> = () => {
   const {
     startDate,
     endDate,
-    pev: pevId,
+    selectedPevs,
     waste: wasteId,
     setReport,
   } = useDashboardContext();
   const [data, setData] = useState<EnergyDataType[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const pevKey = selectedPevs.join("|");
+
   const getData = async () => {
     return getCollectionsByMonthEnergy({
       start: startDate,
       end: endDate,
-      pevId,
+      pevId: selectedPevs,
       wasteId,
     });
   };
@@ -60,7 +62,7 @@ const LineGraphEnergy: FC<LineGraphProps> = () => {
         setLoading(false);
       }
     })();
-  }, [startDate, endDate, pevId, wasteId]);
+  }, [startDate, endDate, pevKey, wasteId]);
 
   return (
     <Paper

@@ -12,10 +12,12 @@ import type { TableData } from "./table/interfaces";
 export interface IContext {
   search: {
     pev: string;
+    cooperative: string;
     startDate: string;
     endDate: string;
     waste: string;
     sortByDate: "asc" | "desc";
+    selectedClient: string;
   };
 
   modalDelete: boolean;
@@ -43,10 +45,12 @@ export const useReportsContext = () => {
 export const ReportsProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const [search, setSearch] = useState<IContext["search"]>({
     pev: "",
+    cooperative: "",
     sortByDate: "desc",
     startDate: moment().subtract(6, "months").format("YYYY-MM-DD"),
     endDate: moment().format("YYYY-MM-DD"),
     waste: "",
+    selectedClient: "",
   });
 
   const [modalForm, setOpenModalForm] = useState(false);

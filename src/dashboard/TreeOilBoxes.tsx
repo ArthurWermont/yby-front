@@ -6,6 +6,7 @@ import { type FC, memo, useEffect, useState } from "react";
 import {
   getCollectionsByMonthOil,
   getCollectionsByMonthTree,
+  getDashboardSummaryLandFillSpace,
   getDashboardSummaryOil,
   getDashboardSummaryRecoveredValue,
   getDashboardSummaryTree,
@@ -18,19 +19,22 @@ const BoxesTreeOil: FC = () => {
   const {
     startDate,
     endDate,
-    pev: pevId,
+    selectedPevs,
     waste: wasteId,
     setReport,
   } = useDashboardContext();
   const [summaryTree, setSummaryTree] = useState<any>(0);
   const [summaryOil, setSummaryOil] = useState<any>(0);
   const [summaryRecoveredValue, setSummaryRecoveredValue] = useState<any>(0);
+  const [summaryLandFillSpace, setSummaryLandFillSpace] = useState<any>(0);
+
+  const pevKey = selectedPevs.join("|");
 
   const getDataByMonthTree = async () => {
     return getCollectionsByMonthTree({
       start: startDate,
       end: endDate,
-      pevId,
+      pevId: selectedPevs,
       wasteId,
     });
   };
@@ -39,7 +43,7 @@ const BoxesTreeOil: FC = () => {
     return getCollectionsByMonthOil({
       start: startDate,
       end: endDate,
-      pevId,
+      pevId: selectedPevs,
       wasteId,
     });
   };
@@ -56,7 +60,7 @@ const BoxesTreeOil: FC = () => {
       const response = await getDashboardSummaryTree({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -74,7 +78,7 @@ const BoxesTreeOil: FC = () => {
       const response = await getDashboardSummaryOil({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -92,7 +96,7 @@ const BoxesTreeOil: FC = () => {
       const response = await getDashboardSummaryRecoveredValue({
         start: startDate,
         end: endDate,
-        pevId,
+        pevId: selectedPevs,
         wasteId,
       });
 
@@ -100,10 +104,25 @@ const BoxesTreeOil: FC = () => {
       setReport({ recoveredValueSummary: response.data.totalRecoveredValue });
     };
 
+    const fetchSummaryLandFillSpace = async () => {
+      const response = await getDashboardSummaryLandFillSpace({
+        start: startDate,
+        end: endDate,
+        pevId: selectedPevs,
+        wasteId,
+      });
+
+      setSummaryLandFillSpace(response.data.totalLandfillSpace);
+      setReport({
+        landFillSpaceSummary: response.data.totalLandfillSpace,
+      });
+    };
+
     fetchSummaryTree();
     fetchSummaryOil();
     fetchSummaryRecoveredValue();
-  }, [pevId, startDate, endDate, wasteId]);
+    fetchSummaryLandFillSpace();
+  }, [pevKey, startDate, endDate, wasteId]);
 
   const formatNumber = (value: number) => {
     return value.toLocaleString("pt-BR", {
@@ -138,8 +157,8 @@ const BoxesTreeOil: FC = () => {
         {
           icon: <Delete sx={{ color: "white" }} />,
           bg: "#4B3838",
-          label: "ESPAÇO EM ATERRO SANITÁRIO (m²)",
-          value: 3000 + " M²",
+          label: "ESPAÇO EM ATERRO SANITÁRIO (m³)",
+          value: formatNumber(summaryLandFillSpace) + " M³",
         },
       ].map((item, i) => (
         <Paper

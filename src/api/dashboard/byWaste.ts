@@ -3,8 +3,8 @@ import api from "../api";
 interface ByWasteParams {
   start: string;
   end: string;
-  pevId?: string;
-  wasteId?: string
+  pevId?: string[];
+  wasteId?: string;
 }
 
 export interface IByWaste {

@@ -18,20 +18,26 @@ const StyledButton = styled(Button)({
 
 export const Exports = () => {
   const {
-    search: { startDate, endDate, pev, waste },
+    search: { startDate, endDate, pev, waste, cooperative, selectedClient },
   } = useReportsContext();
   const { user: currentUser } = useContext(AuthContext);
   const isClient = !!currentUser?.client_id;
+  const isManager = !!currentUser?.isManager;
+  const isAdmin = !!currentUser?.isAdmin;
 
   const query = qs.stringify({
-    doc: currentUser?.client_id,
+    doc: currentUser?.client_id || "",
     end: endDate,
     start: startDate,
     client: isClient,
+    manager: isManager,
+    admin: isAdmin,
     pev,
     waste,
+    cooperative,
+    selectedClient,
   });
-  
+
   return (
     <div id="exports">
       {/* <GeneratePDF collections={filteredCollections} />
@@ -45,7 +51,7 @@ export const Exports = () => {
       </Link>
 
       {/* <StyledButton>Exportar para Excel</StyledButton> */}
-      <GenerateExcel/>
+      <GenerateExcel />
     </div>
   );
 };

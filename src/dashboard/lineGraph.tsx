@@ -24,18 +24,20 @@ const LineGraph: FC<LineGraphProps> = () => {
   const {
     startDate,
     endDate,
-    pev: pevId,
+    selectedPevs,
     waste: wasteId,
     setReport,
   } = useDashboardContext();
   const [data, setData] = useState<WeightDataType[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const pevKey = selectedPevs.join("|");
+
   const getData = async () => {
     return getCollectionsByMonth({
       start: startDate,
       end: endDate,
-      pevId,
+      pevId: selectedPevs,
       wasteId,
     });
   };
@@ -44,7 +46,7 @@ const LineGraph: FC<LineGraphProps> = () => {
     return getDashboardSummary({
       start: startDate,
       end: endDate,
-      pevId,
+      pevId: selectedPevs,
       wasteId,
     });
   };
@@ -73,7 +75,7 @@ const LineGraph: FC<LineGraphProps> = () => {
         setLoading(false);
       }
     })();
-  }, [startDate, endDate, pevId, wasteId]);
+  }, [startDate, endDate, pevKey, wasteId]);
 
   return (
     <Paper

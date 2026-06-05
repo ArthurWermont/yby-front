@@ -3,7 +3,7 @@ import api from "../api";
 export interface ByMonthParams {
   start: string;
   end: string;
-  pevId?: string;
+  pevId?: string[];
   wasteId?: string;
 }
 
@@ -13,7 +13,7 @@ export type WeightDataType = {
 };
 
 export async function getCollectionsByMonth(
-  params: ByMonthParams
+  params: ByMonthParams,
 ): Promise<WeightDataType[]> {
   const { data } = await api.get("/collections/dashboard/by-month", {
     params,

@@ -18,23 +18,37 @@ const StyledButton = styled(Button)({
 
 const GenerateExcel = () => {
   const {
-    search: { startDate, endDate, pev, waste },
+    search: { startDate, endDate, pev, waste, cooperative, selectedClient },
   } = useReportsContext();
   const { user: currentUser } = useContext(AuthContext);
 
   const fetchAll = async (page = 1, limit = 500, items = []) => {
     try {
+      const isAdmin = !!currentUser?.isAdmin;
+      const isManager = !!currentUser?.isManager;
+      const isClient = !!currentUser?.client_id;
+
+      const managerClientIds = isManager
+        ? (currentUser?.manager?.clients ?? [])
+            .map((client: any) => client.documentId)
+            .filter((id: string | undefined): id is string => !!id)
+        : [];
+        
       const { data: reportData, meta } = await reportService.getData({
-        documentId: currentUser?.documentId || "",
-        isAdmin: currentUser?.isAdmin,
+        documentId: isClient ? currentUser?.client_id || "" : "",
+        isAdmin,
+        isManager,
+        managerClientIds,
         page,
         limit: 100,
         search: {
           startDate,
           endDate,
           pev,
+          cooperative,
           waste,
           sortByDate: "desc",
+          selectedClient,
         },
       });
 
@@ -45,14 +59,17 @@ const GenerateExcel = () => {
       }
 
       return accItems;
-    } catch (error) {}
+    } catch (error) {
+      console.error("Erro ao exportar Excel:", error);
+      return [];
+    }
   };
 
   const sum = (data: any[] = [], key: string) => {
     return data.reduce((acc, cur) => {
       const valueFormatted = `${cur[key] ?? 0}`.replace(",", ".");
       acc = acc + parseFloat(valueFormatted);
-      return  acc;
+      return acc;
     }, 0);
   };
 
@@ -96,11 +113,11 @@ const GenerateExcel = () => {
     ];
     worksheetResume["!cols"] = colunas;
 
-    const total = sum(dataSheet, "Coleta (kg)"); 
+    const total = sum(dataSheet, "Coleta (kg)");
 
     XLSX.utils.sheet_add_aoa(
       worksheetResume,
-      [[], [`Peso Total das Coletas: ${total}`]],
+      [[], [`Peso Total das Coletas: ${total.toFixed(2)}`]],
       { origin: `A${dataSheet!.length + 2}` },
     );
 
@@ -127,7 +144,7 @@ const GenerateExcel = () => {
 
       XLSX.utils.sheet_add_aoa(
         worksheet,
-        [[], [`Peso Total das Coletas: ${total}`]],
+        [[], [`Peso Total das Coletas: ${total.toFixed(2)}`]],
         { origin: `A${data!.length + 2}` },
       );
 

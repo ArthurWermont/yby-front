@@ -3,7 +3,7 @@ import api from "../api";
 export interface SummaryParams {
   start: string;
   end: string;
-  pevId?: string;
+  pevId?: string [];
   wasteId?: string;
 }
 

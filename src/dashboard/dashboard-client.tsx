@@ -37,8 +37,8 @@ export default function DashAdmin() {
     mode,
     startDate,
     endDate,
-    pev: pevId,
-    pevName,
+    selectedPevs,
+    selectedPevNames,
     waste,
     wasteName
   } = useDashboardContext();
@@ -100,8 +100,8 @@ export default function DashAdmin() {
                     mode={mode}
                     startDate={startDate}
                     endDate={endDate}
-                    pevId={pevId}
-                    pevName={pevName}
+                    selectedPevs={selectedPevs}
+                    selectedPevNames={selectedPevNames}
                     waste={waste}
                     wasteName={wasteName}
                     {...report}

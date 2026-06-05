@@ -8,6 +8,7 @@ export * from "./byMonthTree";
 export * from "./summary";
 export * from "./summaryCO2";
 export * from "./summaryEnergy";
+export * from "./summaryLandFillSpace";
 export * from "./summaryOil";
 export * from "./summaryRecoveredValue";
 export * from "./summaryTree";

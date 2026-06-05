@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { styled as styledComponents } from "styled-components";
 import ClientForm from "./client-form";
 import CooperativeForm from "./cooperative-form";
+import ManagerForm from "./manager-form";
 
 const StyledContainer = styledComponents.div`
     display: flex;
@@ -29,6 +30,9 @@ export default function Register({ type }: { type: string }) {
     if (newValue === 1) {
       navigate("/cadastro/cooperativa");
     }
+    if (newValue === 2) {
+      navigate("/cadastro/gestor");
+    }
     setValue(newValue);
   };
 
@@ -38,6 +42,9 @@ export default function Register({ type }: { type: string }) {
     }
     if (type === "cooperativa") {
       setValue(1);
+    }
+    if (type === "gestor") {
+      setValue(2);
     }
   }, [type]);
 
@@ -101,9 +108,31 @@ export default function Register({ type }: { type: string }) {
           >
             COOPERATIVA
           </ToggleButton>
+          <ToggleButton
+            style={{
+              backgroundColor:
+                value === 2 ? "#15853B" : "rgb(200, 200, 200, 0.5)",
+              flex: 1,
+              height: "36px",
+              border: "0px",
+              borderTopLeftRadius: "8px",
+              borderBottomLeftRadius: "8px",
+              fontSize: "14px",
+              textAlign: "center",
+              cursor: "pointer",
+              fontWeight: "600",
+              color: value === 2 ? "white" : "#15853B",
+            }}
+            value="clientw"
+            selected={value === 2}
+            onChange={() => handleChange(2)}
+          >
+            GESTOR
+          </ToggleButton>
         </div>
         {value === 0 && <ClientForm />}
         {value === 1 && <CooperativeForm />}
+        {value === 2 && <ManagerForm />}
       </StyledCenterContainer>
     </StyledContainer>
   );
