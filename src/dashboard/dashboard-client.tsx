@@ -17,6 +17,8 @@ import LineGraphWater from "./lineGraphWater";
 import DashboardPDF from "./pdf";
 import TreeOilBoxes from "./TreeOilBoxes";
 import BoxesWaterEnergy from "./WaterEnergyBoxes";
+import { ExportStoriesButton } from "./instagram-report/ExportStoriesButton";
+
 // Estilizações
 const StyledContainer = styledComponents.div`
   display: flex;
@@ -40,7 +42,7 @@ export default function DashAdmin() {
     selectedPevs,
     selectedPevNames,
     waste,
-    wasteName
+    wasteName,
   } = useDashboardContext();
 
   // const isReportReady =
@@ -94,35 +96,56 @@ export default function DashAdmin() {
                 Dashboard
               </Typography>
 
-              <PDFDownloadLink
-                document={
-                  <DashboardPDF
-                    mode={mode}
-                    startDate={startDate}
-                    endDate={endDate}
-                    selectedPevs={selectedPevs}
-                    selectedPevNames={selectedPevNames}
-                    waste={waste}
-                    wasteName={wasteName}
-                    {...report}
-                  />
-                }
-                fileName="dashboard-report.pdf"
-              >
-                {({ loading }) => (
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#2E7D32",
-                      textTransform: "none",
-                      fontWeight: 500,
-                    }}
-                    disabled={loading /* || !isReportReady */}
-                  >
-                    {loading ? "Gerando..." : "BAIXAR DASHBOARD"}
-                  </Button>
-                )}
-              </PDFDownloadLink>
+              <Box display="flex" gap={1.5} alignItems="center">
+                <ExportStoriesButton
+                  mode={mode}
+                  startDate={startDate}
+                  endDate={endDate}
+                  selectedPevs={selectedPevs}
+                  selectedPevNames={selectedPevNames}
+                  waste={waste}
+                  wasteName={wasteName}
+                  {...report}
+                />
+
+                <PDFDownloadLink
+                  document={
+                    <DashboardPDF
+                      mode={mode}
+                      startDate={startDate}
+                      endDate={endDate}
+                      selectedPevs={selectedPevs}
+                      selectedPevNames={selectedPevNames}
+                      waste={waste}
+                      wasteName={wasteName}
+                      {...report}
+                    />
+                  }
+                  fileName="dashboard-report.pdf"
+                  style={{ textDecoration: "none" }}
+                >
+                  {({ loading: pdfLoading }) => (
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#2E7D32",
+                        textTransform: "none",
+                        fontWeight: 600,
+                        height: 44,
+                        px: 2.4,
+                        borderRadius: "8px",
+                        boxShadow: "0px 3px 8px rgba(46, 125, 50, 0.25)",
+                        "&:hover": {
+                          backgroundColor: "#1B5E20",
+                        },
+                      }}
+                      disabled={pdfLoading}
+                    >
+                      {pdfLoading ? "Gerando PDF..." : "Baixar relatório PDF"}
+                    </Button>
+                  )}
+                </PDFDownloadLink>
+              </Box>
             </div>
             <Divider style={{ marginTop: 8, marginBottom: 24 }} />
 
