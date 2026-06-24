@@ -206,11 +206,11 @@ const BoxesWaterEnergy: FC = (props) => {
 
         <Box>
           <Typography fontWeight={600} fontSize={14}>
-            CO2e Evitado
+            CO₂e Evitado
           </Typography>
 
           <Typography fontWeight={700} fontSize={16}>
-            {formatNumber(summaryCO2)} kg CO2e
+            {formatNumber(summaryCO2)} kg CO₂e
           </Typography>
         </Box>
       </Paper>
@@ -236,7 +236,7 @@ const BoxesWaterEnergy: FC = (props) => {
             right: 6,
           }}
         >
-          <Tooltip title="Estimativa monetária do benefício gerado pelo CO2e evitado, com base no custo social do carbono.">
+          <Tooltip title="Estimativa monetária do benefício gerado pelo CO₂e evitado, com base no custo social do carbono.">
             <IconButton size="small" sx={{ color: "#8A8A8A" }}>
               <InfoOutlinedIcon sx={{ fontSize: 16 }} />
             </IconButton>
@@ -261,7 +261,7 @@ const BoxesWaterEnergy: FC = (props) => {
 
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="caption" color="text.secondary">
-            Baseado no CO2e evitado
+            Baseado no CO₂e evitado
           </Typography>
 
           <Typography fontWeight={600} fontSize={13}>
