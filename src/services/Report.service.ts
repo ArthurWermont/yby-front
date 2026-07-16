@@ -40,7 +40,13 @@ class ReportService extends BaseService {
 
       const filters: any = {};
       const queryParams: any = {
-        populate: "*",
+        populate: {
+          client: true,
+          cooperative: true,
+          wastes: true,
+          colector: true,
+          breakdown: true,
+        },
         filters,
         pagination: {
           start: (+page - 1) * limit,
@@ -122,7 +128,64 @@ class ReportService extends BaseService {
       });
 
       const { data } = await this.api.get(`/collections?${queryString}`);
-      return data;
+      const collections = data?.data || [];
+      const collectionIds = collections.map((collection: any) => collection.id);
+
+      if (!collectionIds.length) {
+        return data;
+      }
+
+      const itemsQueryString = qs.stringify(
+        {
+          filters: {
+            parent_collection_id: {
+              $in: collectionIds,
+            },
+          },
+          populate: {
+            colector: true,
+          },
+          pagination: {
+            page: 1,
+            pageSize: 1000,
+          },
+          sort: ["order:asc"],
+        },
+        {
+          encodeValuesOnly: true,
+          arrayFormat: "indices",
+        },
+      );
+
+      const itemsResponse = await this.api.get(
+        `/collection-items?${itemsQueryString}`,
+      );
+
+      const items = itemsResponse.data?.data || [];
+
+      const itemsByCollectionId = items.reduce((acc: any, item: any) => {
+        const parentId = Number(item.parent_collection_id);
+
+        if (!parentId) return acc;
+
+        if (!acc[parentId]) {
+          acc[parentId] = [];
+        }
+
+        acc[parentId].push(item);
+
+        return acc;
+      }, {});
+
+      const collectionsWithItems = collections.map((collection: any) => ({
+        ...collection,
+        items: itemsByCollectionId[collection.id] || [],
+      }));
+
+      return {
+        ...data,
+        data: collectionsWithItems,
+      };
     } catch (error) {
       console.error("Erro ao buscar os dados do relatório:", error);
       throw error;

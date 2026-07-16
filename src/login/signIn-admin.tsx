@@ -128,7 +128,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           : null,
       };
 
-      console.log("formattedAdmin :>> ", formattedAdmin);
       if (admin) {
         login(formattedAdmin);
         navigate("/relatorios");

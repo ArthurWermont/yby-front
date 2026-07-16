@@ -4,6 +4,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   FormControl,
   FormHelperText,
@@ -19,24 +20,37 @@ import Stack from "@mui/material/Stack";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { editCollection } from "../../api/collection";
+import { editCollection, editCollectionItem } from "../../api/collection";
 
-const schema = yup.object().shape({
-  residuos: yup
-    .array()
-    .required("Residuos é obrigatório")
-    .min(1, "Residuos é obrigatório"),
-  weight: yup
-    .number()
-    .typeError("Peso precisa ser um número")
-    .required("Peso é obrigatório"),
-  justify: yup.string().required("Justificação é obrigatória"),
-  collection_dateDate: yup.string().required("Data da Coleta é obrigatória"),
-  collection_dateTime: yup.string().required("Hora da Coleta é obrigatória"),
-});
+const parseNumber = (value: unknown): number => {
+  const parsed = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const createSchema = (hasItems: boolean) =>
+  yup.object().shape({
+    residuos: hasItems
+      ? yup.array()
+      : yup
+          .array()
+          .required("Residuos é obrigatório")
+          .min(1, "Residuos é obrigatório"),
+
+    weight: hasItems
+      ? yup.mixed()
+      : yup
+          .number()
+          .typeError("Peso precisa ser um número")
+          .required("Peso é obrigatório"),
+
+    justify: yup.string().required("Justificação é obrigatória"),
+    collection_dateDate: yup.string().required("Data da Coleta é obrigatória"),
+    collection_dateTime: yup.string().required("Hora da Coleta é obrigatória"),
+  });
 
 const ModalFormComponent = ({ open, handleClose, data }: any) => {
   const documentId = data.documentId;
+  const hasItems = Array.isArray(data?.items) && data.items.length > 0;
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -46,7 +60,7 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
       collection_dateDate: "",
       collection_dateTime: "",
     },
-    resolver: yupResolver(schema),
+    resolver: yupResolver(createSchema(hasItems)),
   });
 
   const [loading, setLoading] = useState(false);
@@ -54,30 +68,133 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
   const [coletorImage, setColetorImage] = useState<any>(true);
   const [avariaImage, setAvariaImage] = useState<any>(true);
 
-  const onSubmit = async (data: any) => {
+  const [itemWeights, setItemWeights] = useState<Record<string, string>>({});
+
+  const sortedItems = hasItems
+    ? data.items
+        .slice()
+        .sort((a: any, b: any) => Number(a.order || 0) - Number(b.order || 0))
+    : [];
+
+  const getItemImage = (item: any, index: number) => {
+    const order = item.order || index + 1;
+
+    return (
+      data?.itemImages?.find(
+        (image: any) => Number(image.order) === Number(order),
+      )?.imageColector || ""
+    );
+  };
+
+  const totalItems = sortedItems.length;
+
+  const totalItemsWithImage = sortedItems.filter((item: any, index: number) =>
+    Boolean(getItemImage(item, index)),
+  ).length;
+
+  const getItemKey = (item: any, index: number) => {
+    return item.documentId || String(item.id || index);
+  };
+
+  const updateItemWeight = (item: any, index: number, value: string) => {
+    const key = getItemKey(item, index);
+
+    setItemWeights((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const totalEditedWeight = hasItems
+    ? sortedItems.reduce((total: number, item: any, index: number) => {
+        const key = getItemKey(item, index);
+        const value = itemWeights[key] ?? item.weight_kg;
+        return total + parseNumber(value);
+      }, 0)
+    : 0;
+
+  const onSubmit = async (formData: any) => {
     setLoading(true);
 
-    const collection_date = new Date(
-      `${data.collection_dateDate}T${data.collection_dateTime}:00`,
-    ).toISOString();
+    try {
+      const collection_date = new Date(
+        `${formData.collection_dateDate}T${formData.collection_dateTime}:00`,
+      ).toISOString();
 
-    const formatData = {
-      justification: data.justify,
-      weight: data.weight.toString(),
-      wastes: data.residuos,
-      collection_date,
-      ...(coletorImage === false && { colector: null }),
-      ...(avariaImage === false && { breakdown: null }),
-    };
+      if (hasItems) {
+        const updatedItems = sortedItems.map((item: any, index: number) => {
+          const key = getItemKey(item, index);
+          const newWeight = parseNumber(itemWeights[key]);
 
-    await editCollection({
-      documentId,
-      data: formatData,
-    });
-    setLoading(false);
-    handleClose();
+          if (!item.documentId) {
+            throw new Error(
+              `Não foi possível identificar o item ${index + 1} para edição.`,
+            );
+          }
 
-    window.location.reload();
+          if (!newWeight || newWeight <= 0) {
+            throw new Error(
+              `Informe um peso válido em kg para o item ${index + 1}.`,
+            );
+          }
+
+          return {
+            documentId: item.documentId,
+            weight_kg: Number(newWeight.toFixed(2)),
+          };
+        });
+
+        const newTotalWeight = updatedItems.reduce(
+          (total: number, item: any) => total + Number(item.weight_kg || 0),
+          0,
+        );
+
+        for (const item of updatedItems) {
+          const response = await editCollectionItem({
+            documentId: item.documentId,
+            data: {
+              weight_kg: item.weight_kg,
+            },
+          });
+
+          if (!response) {
+            throw new Error(
+              `Não foi possível atualizar o peso do item ${item.documentId}.`,
+            );
+          }
+        }
+
+        await editCollection({
+          documentId,
+          data: {
+            justification: formData.justify,
+            collection_date,
+            weight: String(Number(newTotalWeight.toFixed(2))),
+            ...(avariaImage === false && { breakdown: null }),
+          },
+        });
+      } else {
+        await editCollection({
+          documentId,
+          data: {
+            justification: formData.justify,
+            weight: formData.weight.toString(),
+            wastes: formData.residuos,
+            collection_date,
+            ...(coletorImage === false && { colector: null }),
+            ...(avariaImage === false && { breakdown: null }),
+          },
+        });
+      }
+
+      setLoading(false);
+      handleClose();
+      window.location.reload();
+    } catch (error: any) {
+      console.error(error);
+      alert(error?.message || "Erro ao editar coleta.");
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -95,6 +212,19 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
     setValue("collection_dateDate", dateForInput);
     setValue("collection_dateTime", timeForInput);
   }, [data?.collection_date, setValue]);
+
+  useEffect(() => {
+    if (!open || !hasItems) return;
+
+    const initialWeights: Record<string, string> = {};
+
+    sortedItems.forEach((item: any, index: number) => {
+      const key = getItemKey(item, index);
+      initialWeights[key] = String(item.weight_kg ?? "");
+    });
+
+    setItemWeights(initialWeights);
+  }, [open, hasItems, data?.items]);
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -180,61 +310,265 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
                 Dados da coleta
               </Typography>
 
-              <div>
-                <Controller
-                  name={"residuos"}
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <FormControl fullWidth>
-                      <InputLabel id="residuos">Tipo de residuos</InputLabel>
-                      <Select
-                        {...field}
-                        error={fieldState.error ? true : false}
-                        labelId="residuos"
-                        id="Tipo de residuos"
-                        label="Tipo de residuos"
-                        multiple
-                      >
-                        <MenuItem value={"2"}>Papel</MenuItem>
-                        <MenuItem value={"1"}>Plástico</MenuItem>
-                        <MenuItem value={"3"}>Metal</MenuItem>
-                        <MenuItem value={"4"}>Vidro</MenuItem>
-                        <MenuItem value={"6"}>Orgânicos</MenuItem>
-                        <MenuItem value={"5"}>Reciclaveis Geral</MenuItem>
-                        <MenuItem value={"7"}>Óleo</MenuItem>
-                      </Select>
-                      {fieldState.error && (
-                        <FormHelperText style={{ color: "red" }}>
-                          {fieldState.error.message}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </div>
+              {hasItems ? (
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: 1,
+                      mb: 1.5,
+                    }}
+                  >
+                    <Box>
+                      <Typography sx={{ fontSize: "14px", fontWeight: 800 }}>
+                        Itens da coleta
+                      </Typography>
 
-              <Controller
-                name={"weight"}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <FormControl fullWidth>
-                    <TextField
-                      error={fieldState.error ? true : false}
-                      {...field}
-                      id="weight"
-                      type="text"
-                      placeholder="Coleta em kg"
-                      label="Coleta em kg"
+                      <Typography
+                        sx={{ fontSize: "12px", color: "#777", mt: 0.3 }}
+                      >
+                        Esta coleta possui múltiplos resíduos vinculados.
+                      </Typography>
+                    </Box>
+
+                    <Chip
                       size="small"
-                    ></TextField>
-                    {fieldState.error && (
-                      <FormHelperText style={{ color: "red" }}>
-                        {fieldState.error.message}
-                      </FormHelperText>
+                      label={`${totalItemsWithImage}/${totalItems} com foto`}
+                      sx={{
+                        backgroundColor:
+                          totalItemsWithImage === totalItems
+                            ? "#EEF8F0"
+                            : "#FFF7E6",
+                        color:
+                          totalItemsWithImage === totalItems
+                            ? "#15853B"
+                            : "#9A6A00",
+                        fontWeight: 700,
+                      }}
+                    />
+                  </Box>
+
+                  {sortedItems.map((item: any, index: number) => {
+                    const itemImage = getItemImage(item, index);
+                    const hasImage = Boolean(itemImage);
+
+                    return (
+                      <Box
+                        key={item.documentId || item.id || index}
+                        sx={{
+                          p: 1.5,
+                          border: hasImage
+                            ? "1px solid #BFE3C8"
+                            : "1px solid #E3ECE4",
+                          borderRadius: "12px",
+                          mb: 1,
+                          backgroundColor: "#F8FBF8",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              sx={{ fontSize: "14px", fontWeight: 800 }}
+                            >
+                              Item {item.order || index + 1} —{" "}
+                              {item?.waste_name || "Resíduo"}
+                            </Typography>
+
+                            <Typography
+                              sx={{ fontSize: "13px", color: "#666", mt: 0.3 }}
+                            >
+                              Peso atual:{" "}
+                              <strong>
+                                {Number(item.weight_kg || 0).toLocaleString(
+                                  "pt-BR",
+                                )}{" "}
+                                kg
+                              </strong>
+                            </Typography>
+
+                            <TextField
+                              label="Peso corrigido em kg"
+                              size="small"
+                              value={itemWeights[getItemKey(item, index)] ?? ""}
+                              onChange={(event) =>
+                                updateItemWeight(
+                                  item,
+                                  index,
+                                  event.target.value,
+                                )
+                              }
+                              fullWidth
+                              sx={{ mt: 1 }}
+                              helperText="A quantidade original será mantida como histórico."
+                            />
+                          </Box>
+
+                          <Chip
+                            size="small"
+                            label={hasImage ? "Com foto" : "Sem foto"}
+                            sx={{
+                              backgroundColor: hasImage ? "#EEF8F0" : "#F5F5F5",
+                              color: hasImage ? "#15853B" : "#9A9A9A",
+                              fontWeight: 700,
+                            }}
+                          />
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.8,
+                            mt: 1,
+                          }}
+                        >
+                          <Chip
+                            size="small"
+                            label={`Quantidade original: ${item.original_quantity || "-"} ${
+                              item.original_unit || ""
+                            }`}
+                            sx={{
+                              backgroundColor: "#FFFFFF",
+                              color: "#555",
+                            }}
+                          />
+
+                          {item.collector_volume_breakdown?.total_liters && (
+                            <Chip
+                              size="small"
+                              label={`Total em litros: ${item.collector_volume_breakdown.total_liters} L`}
+                              sx={{
+                                backgroundColor: "#FFFFFF",
+                                color: "#555",
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                    );
+                  })}
+
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      p: 1.5,
+                      borderRadius: "10px",
+                      backgroundColor: "#EEF8F0",
+                      border: "1px solid #BFE3C8",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        color: "#14532D",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Total recalculado da coleta:{" "}
+                      {Number(totalEditedWeight || 0).toLocaleString("pt-BR")}{" "}
+                      kg
+                    </Typography>
+
+                    <Typography
+                      sx={{ fontSize: "12px", color: "#4B5563", mt: 0.4 }}
+                    >
+                      Esse valor será salvo como o novo peso total da coleta
+                      mãe.
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      mt: 1.5,
+                      p: 1.5,
+                      borderRadius: "10px",
+                      backgroundColor: "#FFF8E8",
+                      border: "1px solid #F3DCA0",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: "#8A5A00",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      A edição de peso deve ser feita em kg. A quantidade
+                      original, a unidade original, o resíduo e as evidências
+                      fotográficas serão mantidos como histórico da coleta.
+                    </Typography>
+                  </Box>
+                </Box>
+              ) : (
+                <>
+                  <div>
+                    <Controller
+                      name={"residuos"}
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="residuos">
+                            Tipo de residuos
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            error={fieldState.error ? true : false}
+                            labelId="residuos"
+                            id="Tipo de residuos"
+                            label="Tipo de residuos"
+                            multiple
+                          >
+                            <MenuItem value={"2"}>Papel</MenuItem>
+                            <MenuItem value={"1"}>Plástico</MenuItem>
+                            <MenuItem value={"3"}>Metal</MenuItem>
+                            <MenuItem value={"4"}>Vidro</MenuItem>
+                            <MenuItem value={"6"}>Orgânicos</MenuItem>
+                            <MenuItem value={"5"}>Reciclaveis Geral</MenuItem>
+                            <MenuItem value={"7"}>Óleo</MenuItem>
+                          </Select>
+                          {fieldState.error && (
+                            <FormHelperText style={{ color: "red" }}>
+                              {fieldState.error.message}
+                            </FormHelperText>
+                          )}
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+
+                  <Controller
+                    name={"weight"}
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <FormControl fullWidth>
+                        <TextField
+                          error={fieldState.error ? true : false}
+                          {...field}
+                          id="weight"
+                          type="text"
+                          placeholder="Coleta em kg"
+                          label="Coleta em kg"
+                          size="small"
+                        />
+                        {fieldState.error && (
+                          <FormHelperText style={{ color: "red" }}>
+                            {fieldState.error.message}
+                          </FormHelperText>
+                        )}
+                      </FormControl>
                     )}
-                  </FormControl>
-                )}
-              />
+                  />
+                </>
+              )}
 
               <Typography
                 sx={{
@@ -251,72 +585,184 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
               </Typography>
 
               <div>
-                <Typography
-                  sx={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#333",
-                    mb: 1,
-                  }}
-                >
-                  COLETOR
-                </Typography>
-
-                {data.imageColectorUrl ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: "#F4F8F4",
-                      border: "1px solid #E3ECE4",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      marginTop: "10px",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        flexDirection: "row",
-                        alignItems: "center",
+                {hasItems ? (
+                  <>
+                    <Typography
+                      sx={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#333",
+                        mb: 1,
                       }}
                     >
-                      <ImageIcon
-                        style={{ color: coletorImage ? "#9B9794" : "#C7C4C2" }}
-                      />
-                      <Typography
+                      COLETORES POR ITEM
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                      }}
+                    >
+                      {sortedItems.map((item: any, index: number) => {
+                        const itemImage = getItemImage(item, index);
+                        const hasImage = Boolean(itemImage);
+
+                        return (
+                          <Box
+                            key={`image-status-${item.documentId || item.id || index}`}
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              backgroundColor: "#F4F8F4",
+                              border: "1px solid #E3ECE4",
+                              padding: "10px 12px",
+                              borderRadius: "12px",
+                              justifyContent: "space-between",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: "10px",
+                                flexDirection: "row",
+                                alignItems: "center",
+                              }}
+                            >
+                              <ImageIcon
+                                style={{
+                                  color: hasImage ? "#15853B" : "#C7C4C2",
+                                }}
+                              />
+
+                              <Box>
+                                <Typography
+                                  sx={{
+                                    fontSize: "14px",
+                                    fontWeight: 700,
+                                    color: "#4B5563",
+                                  }}
+                                >
+                                  Item {item.order || index + 1} —{" "}
+                                  {item?.waste_name || "Resíduo"}
+                                </Typography>
+
+                                <Typography
+                                  sx={{
+                                    fontSize: "12px",
+                                    color: hasImage ? "#15853B" : "#9A9A9A",
+                                  }}
+                                >
+                                  {hasImage
+                                    ? "Imagem do coletor vinculada"
+                                    : "Sem imagem do coletor"}
+                                </Typography>
+                              </Box>
+                            </Box>
+
+                            <Chip
+                              size="small"
+                              label={hasImage ? "Com foto" : "Sem foto"}
+                              sx={{
+                                backgroundColor: hasImage
+                                  ? "#EEF8F0"
+                                  : "#F5F5F5",
+                                color: hasImage ? "#15853B" : "#9A9A9A",
+                                fontWeight: 700,
+                              }}
+                            />
+                          </Box>
+                        );
+                      })}
+                    </Box>
+
+                    <Typography
+                      sx={{
+                        fontSize: "12px",
+                        color: "#9A6A00",
+                        mt: 1,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      A troca ou remoção de fotos por item será feita em uma
+                      etapa própria de edição das evidências.
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography
+                      sx={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#333",
+                        mb: 1,
+                      }}
+                    >
+                      COLETOR
+                    </Typography>
+
+                    {data.imageColectorUrl ? (
+                      <div
                         style={{
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          textDecoration: coletorImage
-                            ? "none"
-                            : "line-through",
-                          color: coletorImage ? "#6A6A6A" : "#C7C4C2",
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "#F4F8F4",
+                          border: "1px solid #E3ECE4",
+                          padding: "10px 12px",
+                          borderRadius: "12px",
+                          marginTop: "10px",
+                          justifyContent: "space-between",
                         }}
                       >
-                        Imagem do coletor
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                            flexDirection: "row",
+                            alignItems: "center",
+                          }}
+                        >
+                          <ImageIcon
+                            style={{
+                              color: coletorImage ? "#9B9794" : "#C7C4C2",
+                            }}
+                          />
+                          <Typography
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: 500,
+                              textDecoration: coletorImage
+                                ? "none"
+                                : "line-through",
+                              color: coletorImage ? "#6A6A6A" : "#C7C4C2",
+                            }}
+                          >
+                            Imagem do coletor
+                          </Typography>
+                        </div>
+                        <IconButton
+                          onClick={() => setColetorImage(!coletorImage)}
+                          size="medium"
+                        >
+                          <DeleteIcon style={{ color: "#9B9794" }} />
+                        </IconButton>
+                      </div>
+                    ) : (
+                      <Typography
+                        sx={{
+                          fontSize: "13px",
+                          color: "#9A9A9A",
+                          mt: 0.5,
+                        }}
+                      >
+                        Não possui imagem do coletor
                       </Typography>
-                    </div>
-                    <IconButton
-                      onClick={() => setColetorImage(!coletorImage)}
-                      size="medium"
-                    >
-                      <DeleteIcon style={{ color: "#9B9794" }} />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <Typography
-                    sx={{
-                      fontSize: "13px",
-                      color: "#9A9A9A",
-                      mt: 0.5,
-                    }}
-                  >
-                    Não possui imagem do coletor
-                  </Typography>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -331,7 +777,7 @@ const ModalFormComponent = ({ open, handleClose, data }: any) => {
                 >
                   AVARIA
                 </Typography>
-                {data.imageAvariaUrl ? (
+                {data.imageAvaria ? (
                   <div
                     style={{
                       display: "flex",

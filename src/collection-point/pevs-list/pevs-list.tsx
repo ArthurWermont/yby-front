@@ -1,6 +1,6 @@
 import EventIcon from "@mui/icons-material/Event";
 import { Button, Card, TextField, Typography } from "@mui/material";
-import { Key, useState } from "react";
+import { type Key, useState } from "react";
 
 export const PEVSList = ({
   pevs,
@@ -27,14 +27,14 @@ export const PEVSList = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearchTermChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setSearchTerm(event.target.value);
   };
 
   const filteredDataPevs = pevs
     .filter((item: any) =>
-      item.social_name.toLowerCase().includes(searchTerm.toLowerCase())
+      item.social_name.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .sort((a: { days: string[] }, b: { days: string[] }) => {
       const compareDaysA = compareDays(a.days);
@@ -94,7 +94,7 @@ export const PEVSList = ({
               social_name: string;
               days: string[];
             },
-            index: Key
+            index: Key,
           ) => (
             <Card
               key={index}
@@ -162,7 +162,7 @@ export const PEVSList = ({
                 )}
               </Button>
             </Card>
-          )
+          ),
         )}
       </div>
     </>

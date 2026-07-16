@@ -126,7 +126,7 @@ const MyDocument = ({ rows }: any) => {
         </View>
         <View style={styles.section}>
           <Text style={styles.text}>
-            Peso Total das Coletas: {totalWeight.toFixed(2)} Kilos ou Litros
+            Peso Total das Coletas: {totalWeight.toFixed(2)} Kg
           </Text>
           <Text style={styles.text}>Total de Coletas: {rows.length}</Text>
           <Text style={styles.text}>
