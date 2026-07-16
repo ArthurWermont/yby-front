@@ -1,5 +1,32 @@
 import type { ReactNode } from "react";
 
+export type ReportCollectionItem = {
+  id?: number;
+  documentId?: string;
+  order?: number;
+  waste?: {
+    id?: number;
+    name?: string;
+  };
+  weight_kg?: number;
+  original_quantity?: number;
+  original_unit?: "kg" | "L";
+  collector_volume_breakdown?: any;
+  colector?: {
+    url?: string;
+  };
+};
+
+export type ReportItemImage = {
+  order: number;
+  wasteName: string;
+  weightKg?: number;
+  originalQuantity?: number;
+  originalUnit?: string;
+  collectorVolumeBreakdown?: any;
+  imageColector?: string;
+};
+
 export interface TableData {
   id: string;
   documentId: string;
@@ -12,7 +39,9 @@ export interface TableData {
   imageColectorUrl: string;
   wastesIds: string[];
   collection_date: string;
-  actions: ReactNode;
+  items?: ReportCollectionItem[];
+  itemImages?: ReportItemImage[];
+  actions: ReactNode | null;
 }
 
 export interface ColumnData {

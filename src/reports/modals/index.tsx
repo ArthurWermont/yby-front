@@ -23,11 +23,15 @@ export const Modals = () => {
           images={
             selectedRow
               ? {
+                  imageColectorUrl: selectedRow.imageColectorUrl,
                   imageColector: selectedRow.imageColectorUrl,
                   imageAvaria: selectedRow.imageAvaria,
+                  itemImages: selectedRow.itemImages || [],
                 }
               : undefined
           }
+          cooperative={selectedRow?.cooperative}
+          date={selectedRow?.collection_date}
         />
       )}
 
