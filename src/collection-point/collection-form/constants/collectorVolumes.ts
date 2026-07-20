@@ -8,17 +8,17 @@ export type CollectorVolumeOption = {
 
 export const collectorVolumeOptions: CollectorVolumeOption[] = [
   {
-    id: "50",
-    label: "50 L",
-    liters: 50,
-    description: "Coletor pequeno",
-    image: "/collectors/collector-50.png",
+    id: "100",
+    label: "100 L",
+    liters: 100,
+    description: "Tambor redondo pequeno",
+    image: "/collectors/collector-100.png",
   },
   {
     id: "200",
     label: "200 L",
     liters: 200,
-    description: "Tambor médio",
+    description: "Bombona azul média",
     image: "/collectors/collector-200.png",
   },
   {
@@ -29,17 +29,17 @@ export const collectorVolumeOptions: CollectorVolumeOption[] = [
     image: "/collectors/collector-240.png",
   },
   {
-    id: "550",
-    label: "550 L",
-    liters: 550,
-    description: "Coletor grande",
-    image: "/collectors/collector-550.png",
+    id: "500",
+    label: "500 L",
+    liters: 500,
+    description: "Contentor grande com rodas",
+    image: "/collectors/collector-500.png",
   },
   {
     id: "1000",
     label: "1000 L",
     liters: 1000,
-    description: "Big coletor",
+    description: "Big Bag",
     image: "/collectors/collector-1000.png",
   },
 ];

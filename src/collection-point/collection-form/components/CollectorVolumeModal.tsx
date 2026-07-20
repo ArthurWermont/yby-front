@@ -85,6 +85,12 @@ export function CollectorVolumeModal({
     onConfirm(counts);
   };
 
+  const handleOpenCollectorImage = (image?: string) => {
+    if (!image) return;
+
+    window.open(image, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
@@ -120,6 +126,18 @@ export function CollectorVolumeModal({
             >
               Informe quantos coletores cheios existem nesta coleta. O sistema
               calculará automaticamente o total em litros.
+            </Typography>
+
+            <Typography
+              sx={{
+                mt: 1,
+                fontSize: 12,
+                color: "#15853B",
+                fontWeight: 600,
+                lineHeight: 1.4,
+              }}
+            >
+              Para visualizar melhor cada coletor, clique na imagem.
             </Typography>
           </Box>
 
@@ -158,6 +176,10 @@ export function CollectorVolumeModal({
                 }}
               >
                 <Box
+                  onClick={() => handleOpenCollectorImage(option.image)}
+                  title={
+                    option.image ? "Clique para ampliar a imagem" : option.label
+                  }
                   sx={{
                     width: 64,
                     height: 64,
@@ -168,13 +190,21 @@ export function CollectorVolumeModal({
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
+                    cursor: option.image ? "pointer" : "default",
+                    transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                    "&:hover": option.image
+                      ? {
+                          transform: "scale(1.04)",
+                          boxShadow: "0px 6px 16px rgba(0,0,0,0.16)",
+                        }
+                      : {},
                   }}
                 >
                   {option.image ? (
                     <Box
                       component="img"
                       src={option.image}
-                      alt={option.label}
+                      alt={`Imagem do coletor de ${option.label}`}
                       onError={(event) => {
                         event.currentTarget.style.display = "none";
                       }}
@@ -184,17 +214,17 @@ export function CollectorVolumeModal({
                         objectFit: "contain",
                       }}
                     />
-                  ) : null}
-
-                  <Typography
-                    sx={{
-                      fontSize: 16,
-                      fontWeight: 800,
-                      color: "#15853B",
-                    }}
-                  >
-                    {option.label}
-                  </Typography>
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: "#15853B",
+                      }}
+                    >
+                      {option.label}
+                    </Typography>
+                  )}
                 </Box>
 
                 <Box>

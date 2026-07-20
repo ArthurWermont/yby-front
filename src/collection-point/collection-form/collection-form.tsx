@@ -34,9 +34,11 @@ import {
 } from "./constants/collectorVolumes";
 
 const StyledImage = styled("img")({
+  boxSizing: "border-box",
   objectFit: "cover",
   objectPosition: "center",
   width: "100%",
+  maxWidth: "100%",
   height: "150px",
   display: "flex",
   justifyContent: "center",
@@ -45,6 +47,8 @@ const StyledImage = styled("img")({
 
 const StyledImagePlaceholder = styled("div")({
   width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
   height: "150px",
   backgroundColor: "rgba(21, 133, 59, 0.08)",
   border: "2px dashed #15853B",
@@ -578,6 +582,9 @@ export default function CollectionForm({
                 <div
                   key={item.id}
                   style={{
+                    width: "100%",
+                    maxWidth: "560px",
+                    boxSizing: "border-box",
                     padding: "14px",
                     border: "1px solid #D8E6D8",
                     borderRadius: "12px",
@@ -585,7 +592,6 @@ export default function CollectionForm({
                     display: "flex",
                     flexDirection: "column",
                     gap: "14px",
-                    maxWidth: "560px",
                   }}
                 >
                   <div
@@ -686,7 +692,8 @@ export default function CollectionForm({
                     <div
                       style={{
                         width: "100%",
-                        maxWidth: "520px",
+                        maxWidth: "100%",
+                        boxSizing: "border-box",
                         padding: "14px",
                         border: "1px solid #D8E6D8",
                         borderRadius: "10px",
