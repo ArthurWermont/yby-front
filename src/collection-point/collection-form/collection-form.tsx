@@ -137,7 +137,17 @@ const convertToKg = (
     throw new Error("Esse resíduo não possui densidade cadastrada.");
   }
 
-  return value * density;
+// TEMPORÁRIO: Redução de 50% no volume utilizado para estimar o peso.
+// Ajuste provisório solicitado pela equipe Yby devido à superestimativa
+// dos pesos calculados com as densidades atuais.
+// O fator ainda não foi validado por pesagens reais e deverá ser
+// revisado após a definição de densidades aparentes operacionais.
+// Aplica-se a todos os resíduos registrados em litros.
+// O volume original dos coletores permanece inalterado.
+
+  const REDUCTION_FACTOR = 0.5;
+
+  return value * REDUCTION_FACTOR * density;
 };
 
 const schema = yup.object().shape({
